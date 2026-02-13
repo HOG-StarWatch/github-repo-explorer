@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecting...</title>
+    <style>
+        body { background: #0d1117; color: #c9d1d9; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .msg { text-align: center; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+    </style>
+    <script>
+        // 404 Hack for GitHub Pages
+        // Logic: Redirect /path/to/repo -> /#/path/to/repo
+        // This allows the SPA to load the root index.html, which then reads the hash and routes correctly.
+        
+        const path = window.location.pathname;
+        const search = window.location.search;
+        const hash = window.location.hash;
+
+        if (path && path !== '/') {
+            // Reconstruct the URL using Hash routing
+            // e.g. example.com/user/repo?q=1 -> example.com/#/user/repo?q=1
+            const target = '/#' + path + search + hash;
+            
+            // Use replace to avoid polluting history
+            window.location.replace(target);
+        } else {
+            // If we are at root but somehow 404'd, just go home
+            window.location.replace('/');
+        }
+    </script>
+</head>
+<body>
+    <div class="msg">Redirecting to GitHub Repo Explorer...</div>
+</body>
+</html>
