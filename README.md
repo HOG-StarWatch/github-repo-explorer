@@ -1,75 +1,62 @@
 # GitHub Repo Explorer / 仓库浏览器
 
-**一个简单、优雅且功能强大的 GitHub 仓库/子目录浏览与下载工具。**
-无需后端，纯前端实现，支持 AI 导出、子目录下载与极速预览。
+<div align="center">
 
-[✨ 在线体验 Demo](https://github-repo-explorer.pages.dev/)
+**一个简单、优雅、高效的 GitHub 仓库浏览与下载工具**  
+纯前端实现，无需后端，即开即用
+
+[![在线体验](https://img.shields.io/badge/demo-online-blue?style=flat-square)](https://github-repo-explorer.pages.dev/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/HOG-StarWatch/github-repo-explorer/pulls)
+
+</div>
 
 ---
 
-## 🌟 为什么选择它？ (Why this?)
+## 📖 简介
 
-如果你遇到过以下烦恼，那么这个工具就是为你准备的：
+GitHub Repo Explorer 是一个纯前端的 GitHub 仓库浏览工具，解决 GitHub 原生功能的痛点：
 
-*   **只想下载某个文件夹**：GitHub 原生不支持下载子目录，Clone 整个仓库又慢又占空间。
-*   **喂给 AI 做分析**：想把项目的核心代码（如 `src/utils`）发给 ChatGPT/Claude 分析，但手动一个个文件复制太累。
-*   **网络环境不佳**：GitHub 官网访问慢，或者需要配置代理才能稳定下载 Release。
-*   **快速浏览代码**：不想打开 IDE，只想在浏览器里像操作 VS Code 一样快速折叠/展开文件夹查看代码结构。
+- **下载子目录**：GitHub 不支持单独下载文件夹，而完整克隆太慢
+- **AI 代码分析**：快速导出项目代码给 ChatGPT/Claude 分析
+- **网络加速**：支持代理模板，解决访问慢的问题
+- **快速浏览**：像 VS Code 一样展开/折叠目录，无需跳转页面
 
-## 💡 使用场景 (Use Cases)
+---
 
-1.  **精准资源获取**
-    *   **痛点**：很多开源项目（如字体库、图标库、配置模板）都在一个大仓库里，你只想要其中一小部分。当前已有方法譬如修改 svn，修改 git 路径等，都太麻烦了还不好用。
-    *   **解法**：找到你想要的文件夹 -> 点击 **"Download ZIP"**。
+## ✨ 核心特性
 
-2.  **🚀 极速代码阅读**
-    *   **痛点**：在 GitHub 网页上查看代码需要频繁跳转页面，无法直观看到层级结构。
-    *   **解法**：输入仓库地址 -> 获得一颗完整的目录树，采用 **Recursive Tree API** + **懒加载** 技术。
+### 🚀 高性能浏览
+- **Recursive Tree API**：一次性获取所有文件结构，减少请求次数
+- **懒加载渲染**：仅展开时才创建 DOM，即使数万文件也能流畅渲染
+- **实时文件搜索**：快速定位文件，自动展开匹配目录
+- **分支/Tag 切换**：自动列出所有分支和标签
 
-3.  **⚡ 代理与加速**
-    *   **痛点**：Release 下载链接无法直接访问。
-    *   **解法**：在高级设置中配置 Release 下载镜像/代理模板（支持预览）。
+### 📂 便捷文件操作
+- **子目录下载**：任意文件夹一键打包为 ZIP
+- **复选框选择**：灵活选择需要下载的文件或文件夹
+- **拖拽框选**：像操作系统一样框选多个文件
+- **文件预览**：支持代码文件语法高亮和图片预览
+- **复制链接**：一键复制 Raw 链接或 GitHub 页面链接
 
-4.  **🤖 AI 辅助编程 (Export for AI)**
-    *   **痛点**：向 ChatGPT 提问时，往往需要提供多个文件的上下文。
-    *   **解法**：勾选你需要的文件夹或文件 -> 点击 **"Export to AI"** -> 获得一份包含所有文件路径和内容的 Markdown 格式文本 -> 直接粘贴给 AI。
+### 🤖 AI 友好
+- **Export to AI**：将选中文件合并为 Markdown 格式，直接粘贴给 AI
+- **Token 估算**：实时估算导出内容的 token 数量，避免超出上下文限制
 
-## ✨ 主要特性 (Features)
+### 🔍 仓库发现
+- **关键词搜索**：按语言、Star 数筛选 GitHub 仓库
+- **趋势榜单**：查看每日/每周/每月热门仓库
+- **README 预览**：悬浮卡片快速查看项目介绍，支持双引擎渲染（本地/API）
+- **一键解析**：预览界面直接点击 "Open Here" 即可加载仓库
 
-*   **🚀 纯前端 (Serverless)**: 无需后端服务器，所有逻辑在浏览器中完成，安全且隐私。
-*   **⚡ 性能**: 
-    *   **DOM 懒加载 (Lazy Rendering)**: 即使是包含数万文件的超大仓库也能秒级渲染，不因渲染卡顿。
-    *   **Recursive Tree API**: 一次性获取所有文件结构，极速且节省请求次数。支持检测 **GitHub API Truncated** 限制并发出警告。
-*   **📂 文件操作**: 
-    *   **子目录下载**: 支持下载 GitHub 仓库中的任意子文件夹，自动打包为 ZIP。
-*   **🌲 交互式目录树**: 
-    *   清晰的层级结构展示。
-    *   **复选框支持**: 可选择性下载特定文件或文件夹。
-    *   **文件预览**: 支持预览代码文件和图片。
-    *   **复制链接**: 一键复制文件的 Raw 链接或 GitHub 页面链接。
-    *   **拖拽框选**: 支持像操作系统一样鼠标拖拽框选多个文件。
-    *   **Export to AI**: 将选中文件的内容合并导出为 AI 友好的 Prompt 格式（Markdown），方便喂给 ChatGPT/Claude。
-        *   **Token 估算**: 提供 **Token 估算** 功能，方便控制 Context Window，避免超出限制。
-*   **🔍 实时搜索与发现 (Discovery)**:
-    *   **文件搜索**: 支持在已解析的仓库中实时搜索文件，自动展开目录。
-    *   **仓库发现**: 
-        *   内置 "Find Repos" 功能，支持关键词搜索、编程语言筛选、Stars/Forks 排序。
-        *   **趋势榜单**: 查看 GitHub 每日/每周/每月热门仓库。
-        *   **即时预览**: 悬浮面板快速预览仓库 README，支持 **双引擎渲染** (本地 JS / GitHub API) 和 **源码查看**。
-        *   **一键解析**: 在预览界面直接点击 "Open Here" 即可加载仓库。
-        *   **Github1s**: 支持一键跳转 Github1s 查看源码。
-*   **📊 仓库仪表盘 (Repo Dashboard)**:
-    *   **健康检查**: 自动检测 `.gitignore`, `LICENSE` 等项目配置文件。
-    *   **数据概览**: 可视化展示 Stars, Forks, Watchers, Issues 等核心数据。
-    *   **社区动态 (Activity)**: 集成 GitHub Events API，以时间轴形式展示最新的 Push, PR, Issue 等动态。
-    *   **CI/CD 状态**: 实时查看 GitHub Actions 构建状态。
-    *   **Commits**: 查看最近提交记录。
-    *   **Contributors**: 查看贡献者列表及头像。
-    *   **Issues**: 查看最新 Issue 和 PR 列表。
-    *   **Languages**: 可视化编程语言分布统计。
-*   **🌗 极简 UI**:
-    *   深色模式 (Dark Mode) 风格，沉浸式体验。
-    *   极简的输入框与按钮设计，无干扰。
+### 📊 仓库仪表盘
+- **健康检查**：自动检测 `.gitignore`、`LICENSE` 等配置文件
+- **数据概览**：Stars、Forks、Watchers、Issues 可视化展示
+- **社区动态**：时间轴展示 Push、PR、Issue 等最新动态
+- **CI/CD 状态**：实时查看 GitHub Actions 构建状态
+- **Commits**：查看最近提交记录
+- **贡献者列表**：查看贡献者头像和提交数
+- **语言分布**：可视化编程语言统计
+
 *   **🔗 全能 URL 解析 (Universal URL Parsing)**:
     *   **标准链接**:
         *   仓库主页: `https://github.com/user/repo`
@@ -96,57 +83,90 @@
     *   **特殊格式**:
         *   支持 URL 编码格式 (e.g. `?https%3A%2F%2Fgithub.com...`)。
         *   支持 SSH 链接 (e.g. `git@github.com:user/repo.git`)。
-*   **⚡ 高级功能**:
-    *   **Code Search**: 全局代码搜索，支持预览文件内容和跳转。
-    *   **Releases 下载**: 
-        *   查看 Release 详情（Markdown 渲染）。
-        *   **下载加速**: 支持自定义 Release 附件下载链接模板（支持代理/镜像）。
-    *   **Github1s 集成**: 提供 "Open in Github1s" 按钮，一键在 VS Code 风格的 Web IDE 中查看当前浏览的代码目录。
-        *   [**Github1s 项目**:](https://github.com/conwnet/github1s)是另一个项目。
-    *   **分支/Tag 切换**: 自动列出所有分支和标签，方便切换。
-    *   **Token 支持**: 可配置 GitHub Token 以提高 API 速率限制，支持 **自动持久化存储** (localStorage)，无需重复输入。
-    *   **代理支持**: 支持配置 API 代理以解决网络问题。
-    *   **Deep Linking**: 分享的链接会传递当前路径，方便团队协作。
+### ⚡ 高级功能
+- **Code Search**：全局代码搜索，支持预览和跳转
+- **Releases 管理**：查看 Release 详情，支持自定义下载加速模板
+- **Github1s 集成**：一键在 VS Code 风格的 Web IDE 中查看代码
+    *   [**Github1s 项目**:](https://github.com/conwnet/github1s)是另一个项目。
+- **分支/Tag 切换**: 自动列出所有分支和标签，方便切换。
+- **Token 支持**：配置 GitHub Token 提升 API 速率限制 (60 → 5000/小时)
+- **代理支持**：配置 API 代理解决网络问题
+- **Deep Linking**：分享链接自动恢复当前浏览路径
 
-## 🛠️ 使用方法 (Usage)
+---
 
-1.  **打开工具**: 
-    *   **在线使用**: 访问部署好的页面（推荐）。
-    *   **本地使用**: 克隆项目，直接在浏览器中打开 `index.html` 文件（本地模式下 Path 路由等部分功能不可用，建议使用本地服务器 例如`python -m http.server` 启动）。
-2.  **输入链接**: 将 GitHub 仓库或文件夹的 URL 粘贴到输入框中。
-    * 支持简写: `user/repo`
-    * 支持粘贴完整 URL: `https://github.com/user/repo/tree/main/src`
-3.  **浏览/选择**:
-    * **Enter**: 开始解析。
-    *   展开文件夹浏览结构。
-    * **拖拽**: 框选多个文件。
-4.  **导出/下载**:
-    *   点击 "Download ZIP" 下载选中内容。
-    *   点击 "Export to AI" 获取合并后的文本。
-    
-## ⚙️ 高级配置 (Advanced)
+## 🎯 使用场景
 
-点击 "Settings" 图标可进入高级设置：
-*   **GitHub Token**: 填入 Token 可大幅提升 API 速率限制 (60 -> 5000 次/小时)。
-*   **API Proxy**: 配置 API 代理以解决跨域或访问问题（GithubAPI本身无CORS问题）。
-*   **Download Templates**: 自定义 Release 或 Raw 文件的下载链接模板（支持302跳转的加速服务均可用）。
+| 场景 | 痛点 | 解决方案 |
+|------|------|----------|
+| **下载子文件夹** | 只想获取项目中的某个目录，却要克隆整个仓库 | 找到目标文件夹 → 点击「Download ZIP」 |
+| **AI 代码分析** | 需要把多个文件内容发给 AI，手动复制太慢 | 勾选文件 → 点击「Export to AI」→ 粘贴给 AI |
+| **网络加速** | Release 下载链接无法访问 | 高级设置中配置代理模板 |
+| **快速代码阅读** | GitHub 网页需要频繁跳转页面 | 目录树展开浏览，无需跳转 |
+
+---
+
+## 🛠️ 快速开始
+
+### 在线使用
+访问部署好的页面：[在线体验](https://github-repo-explorer.pages.dev/)
+
+### 本地运行
+```bash
+# 克隆项目
+git clone https://github.com/HOG-StarWatch/github-repo-explorer.git
+cd github-repo-explorer
+
+# 使用本地服务器启动（推荐）
+python -m http.server 8000
+# 或
+npx http-server
+# etc.
+
+# 浏览器访问 http://localhost:8000
+```
+
+### 基本操作
+1. **输入链接**：支持多种格式
+   - 简写：`user/repo`
+   - 完整 URL：`https://github.com/user/repo/tree/main/src`
+   - 用户主页：`https://github.com/user`
+   - SSH 链接：`git@github.com:user/repo.git`
+
+2. **浏览/选择**
+   - 按 `Enter` 开始解析
+   - 展开文件夹查看结构
+   - 拖拽框选多个文件
+
+3. **导出/下载**
+   - 「Download ZIP」下载选中内容
+   - 「Export to AI」导出合并文本
+
+---
+
+## ⚙️ 高级配置
+
+点击「Advanced Settings」进入配置：
+
+| 配置项 | 说明 | 默认值 |
+|--------|------|--------|
+| **GitHub Token** | 提升 API 速率限制 (5000/小时)，本地存储安全 | 可选 |
+| **API Proxy** | 配置 API 代理解决网络问题 | 可选 |
+| **Release 模板** | 自定义 Release 下载链接 | `https://github.com/{owner}/{repo}/releases/download/{tag}/{filename}` |
+| **文件模板** | 自定义 Raw 文件链接 | `https://raw.githubusercontent.com/{owner}/{repo}/{ref}/{path}` |
+*   **Download Relese Templates**: 自定义 Release 或 Raw 文件的下载链接模板（支持302跳转的加速服务均可用）。
     *    GitHub 的 Release 文件下载流程是：访问 github.com/.../download/... -> GitHub 服务器鉴权 -> 302 跳转 到 AWS S3 存储桶
     *    这个 S3 链接是 动态生成且带签名 的，无法直接预测。
 
 ---
 
-## 🚀 部署指南 (Deployment)
-<span id="部署指南-deployment"></span>
+## 🚀 部署指南
 
-### Cloudflare Pages / Netlify
-本项目已包含 `_redirects` 文件，直接部署即可完美支持 SPA 路由。
-*   **配置**: 无需额外配置，确保根目录包含 `_redirects`。
-*   **原理**: `_redirects` 规则 `/* /index.html 200` 会将所有请求重写到首页，由前端 JS 接管路由。
-*   **如果不使用 _redirects**: 访问 `example.com/user/repo` 会触发 404，通过 `404.html` 跳转到 `example.com/#/user/repo`，体验稍差。
-*   **注意**: 如果您的项目根目录下存在 `404.html`，请将其重命名或删除，否则可能会干扰 Cloudflare Pages 的路由规则（优先级高于_redirects）。本项目默认提供 `404.html.bak` 作为备份。
+### Cloudflare Pages / Netlify（推荐）
+项目已包含 `_redirects` 文件，直接部署即可支持 SPA 路由。
 
 ### Vercel
-请在项目根目录创建 `vercel.json`:
+创建 `vercel.json`：
 ```json
 {
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
@@ -154,46 +174,51 @@
 ```
 
 ### GitHub Pages
-由于 GitHub Pages 不支持服务器端重写 (Rewrite)，即访问 `example.com/user/repo` 会返回 404 错误。我提供了两种方案：
+由于 GitHub Pages 不支持服务端重写，提供两种方案：
 
-1.  **推荐**: 使用 **Hash 路由** (e.g. `example.com/#/user/repo`)。本项目原生支持，无需任何配置。
-2.  **Hack 方案**:
-    *   本项目包含一个自定义的 `404.html.bak`。要启用该方案，请将其重命名为 `404.html`。
-    *   当 GitHub Pages 返回 404 时，加载该页面。
-    *   该页面会自动读取 URL 路径 (e.g. `/user/repo`) 并重定向到 `/#/user/repo`。
-    *   **效果**: 用户访问 `example.com/user/repo` -> 闪烁一下 -> 自动跳转到 `example.com/#/user/repo` 并正常加载。
+1. **Hash 路由**（默认）：`example.com/#/user/repo`，无需配置
+2. **404 Hack**：将 `404.html.bak` 重命名为 `404.html`，自动处理路径跳转
 
-## ⚙️ 技术细节 (Technical Details)
+---
 
-### 1. 核心原理
+## 🔧 技术细节
 
-*   **GitHub Trees API**: 使用 `GET /repos/{owner}/{repo}/git/trees/{ref}?recursive=1` 接口一次性获取所有文件。
-    *   `recursive=1`: 一次性获取仓库内所有文件和文件夹的扁平列表（Flat List），极大地减少了 API 请求次数。
-    *   **优势**: 相比逐层递归请求，速度更快且不易触发速率限制。
-*   **Lazy Rendering**: 前端采用懒加载策略，仅当用户展开文件夹时才创建 DOM 节点，极大降低内存占用和渲染时间，且**不消耗额外 API 额度**。
-*   **JSZip**: 纯前端 ZIP 打包库。所有文件内容通过 `fetch` 获取后，直接在浏览器内存中压缩打包，不经过第三方服务器。
+### 核心原理
+- **GitHub Trees API**：`recursive=1` 一次性获取所有文件结构
+- **懒加载渲染**：仅展开时创建 DOM 节点，降低内存占用
+- **JSZip**：纯前端打包，不经过第三方服务器
 
-### 2. URL 智能解析
+### URL 智能解析
+- 支持仓库根目录、分支、子目录、Commit SHA、用户主页
+- 通过预获取分支/标签列表，精准区分分支名和路径
 
-工具通过正则表达式智能解析多种 GitHub URL 格式，支持仓库根目录、特定分支、深层子目录、Commit SHA 乃至用户主页。
+### API 限制优化
+- 未认证：60 次/小时（按 IP）
+- Token 认证：5000 次/小时
+- Token 仅用于请求头，本地存储安全
 
-*   **仓库根目录**: `github.com/user/repo` -> 解析为默认分支的根目录。
-*   **分支/标签**: `github.com/user/repo/tree/dev` -> 解析为 `dev` 分支。
-*   **子目录**: `github.com/user/repo/tree/main/src/assets` -> 自动识别 `main` 为分支，`src/assets` 为路径。
-*   **Commit**: `github.com/user/repo/commit/5f3a...` -> 将 Commit SHA 视为 `ref` 进行解析。
-*   **Ref 歧义处理**: 
-    *   GitHub URL 中的 `tree/feature/new/logic` 可能表示分支 `feature/new` 下的 `logic` 目录，也可能表示分支 `feature/new/logic`。
-    *   **解决方案**: 工具会预先获取仓库的所有 `branch` 和 `tags` 列表，按长度降序排序，优先匹配最长的分支名，从而精准区分分支与路径。
+---
 
-### 3. API 限制与优化
+## 📝 注意事项
 
-*   **速率限制 (Rate Limiting)**:
-    *   未认证请求: 60 次/小时 (按 IP)。
-    *   Token 认证: 5000 次/小时。
-    *   **Token 安全**: Token 仅存储在本地内存中用于请求头，不会发送给除 GitHub API (或用户配置的代理) 以外的任何服务器。
-*   **代理支持**: 允许用户配置 API 代理前缀（如 `https://api.cors.me/`），所有 GitHub API 请求都会通过该前缀转发，解决 CORS 跨域问题或网络访问受限问题。
+- **API 限制**：遇到限制请在设置中配置 GitHub Token
+- **大文件支持**：受浏览器内存限制，建议单个文件 < 10MB，仓库 < 100MB
+- **兼容性**：支持所有现代浏览器（Chrome、Firefox、Safari、Edge）
 
-## 📝 注意事项 (Notes)
+---
 
-*   **API 限制**: GitHub API 对未认证请求有每小时 60 次的限制。如果遇到限制，请在 "Advanced Settings / 高级设置" 中填入 GitHub Token。
-*   **大文件支持**: 由于是纯前端实现，受限于浏览器内存，下载极大的仓库或文件可能会导致浏览器卡顿。但一般情况下，单个文件的大小在 10MB 以下，仓库的大小在 100MB 以下。工具是稳定的。同时工具提供链接，可使用其他下载器完成下载。
+## 🤝 贡献指南
+
+欢迎提交 PR 和 Issue！
+
+1. Fork 项目
+2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 打开 Pull Request
+
+---
+
+<div align="center">
+Made with ❤️ by <a href="https://github.com/HOG-StarWatch">HOG-StarWatch</a>
+</div>

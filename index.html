@@ -15,51 +15,31 @@
     
     <div class="capsule-search">
         <input type="text" id="url" placeholder="Paste GitHub URL / 粘贴 GitHub 链接 (e.g. user/repo)">
-        <button id="btn-analyze" onclick="start()" style="white-space:nowrap;">Analyze</button>
+        <button id="btn-analyze" onclick="start()">Analyze</button>
         <div class="find-btn-container">
             <button id="btn-discovery" onclick="openDiscovery()" title="Find Repos" class="capsule-btn">
-                <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M10.68 11.74a6 6 0 0 1-7.922-8.982 6 6 0 0 1 8.982 7.922l3.04 3.04a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215ZM11.5 6a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0Z"></path></svg>
-                Find
+                <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M10.68 11.74a6 6 0 0 1-7.922-8.982 6 6 0 0 1 8.982 7.922l3.04 3.04a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215ZM11.5 6a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0Z"/></svg>Find
             </button>
         </div>
     </div>
 
     <div class="action-bar">
-        <button class="action-item" id="btn-download" onclick="downloadZip()" disabled>
-            <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M2.75 14A1.75 1.75 0 0 1 1 12.25v-2.5a.75.75 0 0 1 1.5 0v2.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25v-2.5a.75.75 0 0 1 1.5 0v2.5A1.75 1.75 0 0 1 13.25 14Z M7.25 7.689V2a.75.75 0 0 1 1.5 0v5.689l1.97-1.969a.749.749 0 1 1 1.06 1.06l-3.25 3.25a.749.749 0 0 1-1.06 0L4.22 6.78a.749.749 0 1 1 1.06-1.06l1.97 1.969Z"></path></svg>
-            Download ZIP
-        </button>
-        <button class="action-item" id="btn-export-ai" onclick="exportForAI()" disabled>
-            <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M7.75 1.838a.75.75 0 0 1 .5 0l1.16 3.03 3.03 1.16a.75.75 0 0 1 0 1.414l-3.03 1.16-1.16 3.03a.75.75 0 0 1-1.414 0l-1.16-3.03-3.03-1.16a.75.75 0 0 1 0-1.414l3.03-1.16 1.16-3.03ZM8 5.433l-.68 1.772a.75.75 0 0 1-.432.432L5.116 8.317l1.772.68a.75.75 0 0 1 .432.432l.68 1.772.68-1.772a.75.75 0 0 1 .432-.432l1.772-.68-1.772-.68a.75.75 0 0 1-.432-.432L8 5.433Z"></path></svg>
-            Export to AI
-        </button>
-        <button class="action-item" id="btn-status" onclick="openRepoStatus()" disabled>
-            <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M1.5 1.75V13.5h13.75a.75.75 0 0 1 0 1.5H.75a.75.75 0 0 1-.75-.75V1.75a.75.75 0 0 1 1.5 0Zm14.28 2.53-5.25 5.25a.75.75 0 0 1-1.06 0l-2.25-2.25-2.72 2.72a.75.75 0 0 1-1.06-1.06l3.25-3.25a.75.75 0 0 1 1.06 0l2.25 2.25 4.72-4.72a.75.75 0 0 1 1.06 1.06Z"></path></svg>
-            Repo Status
-        </button>
-        <button class="action-item" id="btn-release" onclick="openReleaseInfo()" disabled>
-            <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M1 7.775V2.75C1 1.784 1.784 1 2.75 1h5.025c.464 0 .91.184 1.238.513l6.25 6.25a1.75 1.75 0 0 1 0 2.474l-5.026 5.026a1.75 1.75 0 0 1-2.474 0l-6.25-6.25A1.75 1.75 0 0 1 1 7.775Zm1.5 0c0 .185.073.364.205.495l6.25 6.25c.273.273.716.273.99 0l5.026-5.026c.273-.273.273-.716 0-.99l-6.25-6.25A.697.697 0 0 0 7.775 2.5H2.75a.25.25 0 0 0-.25.25v5.025ZM6 5a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>
-            Releases
-        </button>
-        <button class="action-item" id="btn-github1s" onclick="openGithub1s()" disabled>
-            <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M4.72 3.22a.75.75 0 0 1 1.06 1.06L2.06 8l3.72 3.72a.75.75 0 1 1-1.06 1.06L.47 8.53a.75.75 0 0 1 0-1.06l4.25-4.25Zm6.56 0a.75.75 0 1 0-1.06 1.06L13.94 8l-3.72 3.72a.75.75 0 1 0 1.06 1.06l4.25-4.25a.75.75 0 0 0 0-1.06l-4.25-4.25Z"></path></svg>
-            Github1s
-        </button>
-        <button class="action-item" id="btn-code-search" onclick="openCodeSearch()" disabled>
-            <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M10.68 11.74a6 6 0 0 1-7.922-8.982 6 6 0 0 1 8.982 7.922l3.04 3.04a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215ZM11.5 6a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0Z"></path></svg>
-            Code Search
-        </button>
+        <button class="action-item" id="btn-download" onclick="downloadZip()" disabled><svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M2.75 14A1.75 1.75 0 0 1 1 12.25v-2.5a.75.75 0 0 1 1.5 0v2.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25v-2.5a.75.75 0 0 1 1.5 0v2.5A1.75 1.75 0 0 1 13.25 14ZM7.25 7.689V2a.75.75 0 0 1 1.5 0v5.689l1.97-1.969a.749.749 0 1 1 1.06 1.06l-3.25 3.25a.749.749 0 0 1-1.06 0L4.22 6.78a.749.749 0 1 1 1.06-1.06l1.97 1.969Z"/></svg>Download ZIP</button>
+        <button class="action-item" id="btn-export-ai" onclick="exportForAI()" disabled><svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M7.75 1.838a.75.75 0 0 1 .5 0l1.16 3.03 3.03 1.16a.75.75 0 0 1 0 1.414l-3.03 1.16-1.16 3.03a.75.75 0 0 1-1.414 0l-1.16-3.03-3.03-1.16a.75.75 0 0 1 0-1.414l3.03-1.16 1.16-3.03ZM8 5.433l-.68 1.772a.75.75 0 0 1-.432.432L5.116 8.317l1.772.68a.75.75 0 0 1 .432.432l.68 1.772.68-1.772a.75.75 0 0 1 .432-.432l1.772-.68-1.772-.68a.75.75 0 0 1-.432-.432L8 5.433Z"/></svg>Export to AI</button>
+        <button class="action-item" id="btn-status" onclick="openRepoStatus()" disabled><svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M1.5 1.75V13.5h13.75a.75.75 0 0 1 0 1.5H.75a.75.75 0 0 1-.75-.75V1.75a.75.75 0 0 1 1.5 0Zm14.28 2.53-5.25 5.25a.75.75 0 0 1-1.06 0l-2.25-2.25-2.72 2.72a.75.75 0 0 1-1.06-1.06l3.25-3.25a.75.75 0 0 1 1.06 0l2.25 2.25 4.72-4.72a.75.75 0 0 1 1.06 1.06Z"/></svg>Repo Status</button>
+        <button class="action-item" id="btn-release" onclick="openReleaseInfo()" disabled><svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M1 7.775V2.75C1 1.784 1.784 1 2.75 1h5.025c.464 0 .91.184 1.238.513l6.25 6.25a1.75 1.75 0 0 1 0 2.474l-5.026 5.026a1.75 1.75 0 0 1-2.474 0l-6.25-6.25A1.75 1.75 0 0 1 1 7.775Zm1.5 0c0 .185.073.364.205.495l6.25 6.25c.273.273.716.273.99 0l5.026-5.026c.273-.273.273-.716 0-.99l-6.25-6.25A.697.697 0 0 0 7.775 2.5H2.75a.25.25 0 0 0-.25.25v5.025ZM6 5a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"/></svg>Releases</button>
+        <button class="action-item" id="btn-github1s" onclick="openGithub1s()" disabled><svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M4.72 3.22a.75.75 0 0 1 1.06 1.06L2.06 8l3.72 3.72a.75.75 0 1 1-1.06 1.06L.47 8.53a.75.75 0 0 1 0-1.06l4.25-4.25Zm6.56 0a.75.75 0 1 0-1.06 1.06L13.94 8l-3.72 3.72a.75.75 0 1 0 1.06 1.06l4.25-4.25a.75.75 0 0 0 0-1.06l-4.25-4.25Z"/></svg>Github1s</button>
+        <button class="action-item" id="btn-code-search" onclick="openCodeSearch()" disabled><svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M10.68 11.74a6 6 0 0 1-7.922-8.982 6 6 0 0 1 8.982 7.922l3.04 3.04a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215ZM11.5 6a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0Z"/></svg>Code Search</button>
     </div>
 
     <!-- Status Modal -->
     <div id="status-modal" class="modal-overlay">
-        <div class="modal-content" style="max-width: 800px; max-height: 85vh; display:flex; flex-direction:column; width:90%;">
-             <div class="modal-header">
+        <div class="modal-content" style="max-width:800px;max-height:85vh;width:90%">
+            <div class="modal-header">
                 <span style="font-weight:600">Repo Dashboard</span>
                 <span class="close-modal" onclick="$('#status-modal').style.display='none'">×</span>
             </div>
-            
-            <div class="tab-nav" style="overflow-x:auto;">
+            <div class="tab-nav">
                 <div class="tab-item active" onclick="switchStatusTab('overview')">Overview</div>
                 <div class="tab-item" onclick="switchStatusTab('activity')">Activity</div>
                 <div class="tab-item" onclick="switchStatusTab('commits')">Commits</div>
@@ -68,71 +48,39 @@
                 <div class="tab-item" onclick="switchStatusTab('languages')">Languages</div>
                 <div class="tab-item" onclick="switchStatusTab('ci')">CI/CD</div>
             </div>
-
-            <div class="modal-body" style="padding:0; display:flex; flex-direction:column; overflow:hidden;">
-                <!-- Overview Tab -->
-                <div id="status-tab-overview" class="status-tab-content active">
-                    Loading...
-                </div>
-                
-                <!-- Activity Tab -->
-                <div id="status-tab-activity" class="status-tab-content">
-                    <div style="text-align:center; padding:20px; color:#8b949e;">Loading activity...</div>
-                </div>
-
-                <!-- Commits Tab -->
-                <div id="status-tab-commits" class="status-tab-content">
-                    <div style="text-align:center; padding:20px; color:#8b949e;">Loading commits...</div>
-                </div>
-
-                <!-- Contributors Tab -->
-                <div id="status-tab-contributors" class="status-tab-content">
-                    <div style="text-align:center; padding:20px; color:#8b949e;">Loading contributors...</div>
-                </div>
-
-                <!-- Issues Tab -->
-                <div id="status-tab-issues" class="status-tab-content">
-                    <div style="text-align:center; padding:20px; color:#8b949e;">Loading issues...</div>
-                </div>
-
-                <!-- Languages Tab -->
-                <div id="status-tab-languages" class="status-tab-content">
-                    <div style="text-align:center; padding:20px; color:#8b949e;">Loading languages...</div>
-                </div>
-
-                <!-- CI Tab -->
-                <div id="status-tab-ci" class="status-tab-content">
-                    <div style="text-align:center; padding:20px; color:#8b949e;">Loading CI status...</div>
-                </div>
+            <div class="modal-body" style="padding:0">
+                <div id="status-tab-overview" class="status-tab-content active">Loading...</div>
+                <div id="status-tab-activity" class="status-tab-content"><div style="text-align:center;padding:20px;color:#8b949e">Loading activity...</div></div>
+                <div id="status-tab-commits" class="status-tab-content"><div style="text-align:center;padding:20px;color:#8b949e">Loading commits...</div></div>
+                <div id="status-tab-contributors" class="status-tab-content"><div style="text-align:center;padding:20px;color:#8b949e">Loading contributors...</div></div>
+                <div id="status-tab-issues" class="status-tab-content"><div style="text-align:center;padding:20px;color:#8b949e">Loading issues...</div></div>
+                <div id="status-tab-languages" class="status-tab-content"><div style="text-align:center;padding:20px;color:#8b949e">Loading languages...</div></div>
+                <div id="status-tab-ci" class="status-tab-content"><div style="text-align:center;padding:20px;color:#8b949e">Loading CI status...</div></div>
             </div>
         </div>
     </div>
 
     <!-- Discovery Modal -->
     <div id="discovery-modal" class="modal-overlay">
-        <div class="modal-content" style="max-width: 1200px; height: 90vh; display:flex; flex-direction:column;">
+        <div class="modal-content" style="max-width:1200px;height:90vh">
             <div class="modal-header">
                 <span id="disc-modal-title" style="font-weight:600">Repo Discovery / 发现仓库</span>
                 <span class="close-modal" onclick="closeDiscovery()">×</span>
             </div>
-            <div class="modal-body" style="padding:0; display:flex; flex:1; overflow:hidden;">
-                <!-- Sidebar -->
-                <div class="discovery-sidebar" style="width:300px; border-right:1px solid var(--border); padding:15px; overflow-y:auto; flex-shrink:0;">
-                    <div style="margin-bottom:15px; font-weight:bold; color:var(--text);">Search & Filter</div>
-                    
-                    <div class="tab-group" style="display:flex; gap:10px; margin-bottom:15px;">
+            <div class="modal-body" style="padding:0;display:flex;flex:1;overflow:hidden">
+                <div class="discovery-sidebar" style="width:300px;border-right:1px solid var(--border);padding:15px;overflow-y:auto">
+                    <div style="margin-bottom:15px;font-weight:bold">Search & Filter</div>
+                    <div class="tab-group" style="display:flex;gap:10px;margin-bottom:15px">
                         <div class="capsule-tab active" onclick="switchDiscoveryMode('search')" id="tab-search">Keyword</div>
                         <div class="capsule-tab" onclick="switchDiscoveryMode('trending')" id="tab-trending">Trending</div>
                     </div>
-
-                    <div id="disc-search-controls" style="margin-bottom:15px;">
-                        <label style="display:block; margin-bottom:5px; font-size:12px; color:var(--text-dim);">Keyword</label>
-                        <input type="text" id="disc-searchInput" class="minimal-input-enhanced" placeholder="React, Vue, AI..." style="margin-bottom:0;">
+                    <div style="margin-bottom:15px">
+                        <label style="display:block;margin-bottom:5px;font-size:12px;color:var(--text-dim)">Keyword</label>
+                        <input type="text" id="disc-searchInput" class="minimal-input-enhanced" placeholder="React, Vue, AI...">
                     </div>
-
-                    <div style="margin-bottom:15px;">
-                        <label style="display:block; margin-bottom:5px; font-size:12px; color:var(--text-dim);">Language</label>
-                        <select id="disc-langSelect" class="minimal-input-enhanced" style="margin-bottom:0;">
+                    <div style="margin-bottom:15px">
+                        <label style="display:block;margin-bottom:5px;font-size:12px;color:var(--text-dim)">Language</label>
+                        <select id="disc-langSelect" class="minimal-input-enhanced">
                             <option value="">All Languages</option>
                             <option value="javascript">JavaScript</option>
                             <option value="typescript">TypeScript</option>
@@ -150,64 +98,54 @@
                             <option value="dart">Dart</option>
                         </select>
                     </div>
-
-                    <div style="margin-bottom:15px;">
-                        <label style="display:block; margin-bottom:5px; font-size:12px; color:var(--text-dim);">Sort By</label>
-                        <select id="disc-sortSelect" class="minimal-input-enhanced" style="margin-bottom:0;">
+                    <div style="margin-bottom:15px">
+                        <label style="display:block;margin-bottom:5px;font-size:12px;color:var(--text-dim)">Sort By</label>
+                        <select id="disc-sortSelect" class="minimal-input-enhanced">
                             <option value="stars">Stars</option>
                             <option value="forks">Forks</option>
                             <option value="updated">Updated</option>
                         </select>
                     </div>
-
-                    <div style="margin-bottom:15px;">
-                        <label style="display:block; margin-bottom:5px; font-size:12px; color:var(--text-dim);">Min Stars</label>
-                        <input type="number" id="disc-minStars" class="minimal-input-enhanced" placeholder="e.g. 1000" min="0" style="margin-bottom:0;">
+                    <div style="margin-bottom:15px">
+                        <label style="display:block;margin-bottom:5px;font-size:12px;color:var(--text-dim)">Min Stars</label>
+                        <input type="number" id="disc-minStars" class="minimal-input-enhanced" placeholder="e.g. 1000" min="0">
                     </div>
-
-                    <div style="margin-bottom:15px;">
-                        <label style="display:block; margin-bottom:5px; font-size:12px; color:var(--text-dim);">Date Range</label>
-                        <select id="disc-dateRange" class="minimal-input-enhanced" style="margin-bottom:0;" disabled>
+                    <div style="margin-bottom:15px">
+                        <label style="display:block;margin-bottom:5px;font-size:12px;color:var(--text-dim)">Date Range</label>
+                        <select id="disc-dateRange" class="minimal-input-enhanced" disabled>
                             <option value="daily">Daily</option>
                             <option value="weekly" selected>Weekly</option>
                             <option value="monthly">Monthly</option>
                         </select>
                     </div>
-
-                    <button id="disc-actionBtn" onclick="performDiscoveryAction()" style="width:100%;">Search</button>
+                    <button id="disc-actionBtn" onclick="performDiscoveryAction()" style="width:100%">Search</button>
                 </div>
-
-                <!-- Main List -->
-                <div class="discovery-main" style="flex:1; display:flex; flex-direction:column; overflow:hidden;">
-                    <div style="padding:15px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
-                        <div id="disc-list-title" style="font-weight:bold;">Search Results</div>
-                        <div id="disc-result-count" style="font-size:12px; color:var(--text-dim);">0 items</div>
+                <div class="discovery-main" style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+                    <div style="padding:15px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between">
+                        <div id="disc-list-title" style="font-weight:bold">Search Results</div>
+                        <div id="disc-result-count" style="font-size:12px;color:var(--text-dim)">0 items</div>
                     </div>
-                    <div id="disc-repo-list" style="flex:1; overflow-y:auto; padding:15px; display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap:15px; align-content:start;">
-                        <div style="grid-column: 1/-1; text-align: center; padding: 50px; color: #8b949e;">
-                            Enter keywords or select trending on the left
-                        </div>
+                    <div id="disc-repo-list" style="flex:1;overflow-y:auto;padding:15px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:15px">
+                        <div style="grid-column:1/-1;text-align:center;padding:50px;color:#8b949e">Enter keywords or select trending on the left</div>
                     </div>
                 </div>
-                
-                <!-- Preview Panel (Nested) -->
                 <div id="disc-preview-panel">
-                    <div style="padding:10px 15px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; height: 50px;">
-                        <span id="disc-preview-title" style="font-weight:bold; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex: 1; margin-right: 10px;">Preview</span>
-                        <div style="display:flex; align-items:center;">
-                             <select id="disc-render-engine" onchange="rerenderPreview()" style="margin-right:15px; font-size:12px; padding:4px 8px; border:1px solid var(--border); background:var(--bg); color:var(--text); border-radius:4px;">
-                                 <option value="js">JS Render (Fast)</option>
-                                 <option value="api">GitHub API (Perfect)</option>
-                                 <option value="source">Source Code</option>
-                             </select>
-                             <button onclick="closeDiscPreview()" class="preview-close-btn">×</button>
+                    <div style="padding:10px 15px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;height:50px">
+                        <span id="disc-preview-title" style="font-weight:bold;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;margin-right:10px">Preview</span>
+                        <div style="display:flex;align-items:center">
+                            <select id="disc-render-engine" onchange="rerenderPreview()" style="margin-right:15px;font-size:12px;padding:4px 8px;border:1px solid var(--border);background:var(--bg);color:var(--text);border-radius:4px">
+                                <option value="js">JS Render (Fast)</option>
+                                <option value="api">GitHub API (Perfect)</option>
+                                <option value="source">Source Code</option>
+                            </select>
+                            <button onclick="closeDiscPreview()" class="preview-close-btn">×</button>
                         </div>
                     </div>
-                    <div id="disc-preview-content" class="markdown-body" style="flex:1; overflow-y:auto; padding:20px;"></div>
-                    <div style="padding:15px; border-top:1px solid var(--border); display:flex; gap:10px;">
-                        <button id="disc-btn-open" class="action-item" style="flex:1; justify-content:center;">Open Here</button>
-                        <button id="disc-btn-github1s" class="action-item" style="flex:1; justify-content:center;">Github1s</button>
-                        <a id="disc-link-github" href="#" target="_blank" style="flex:1; display:flex;"><button class="action-item" style="width:100%; justify-content:center;">GitHub</button></a>
+                    <div id="disc-preview-content" class="markdown-body" style="flex:1;overflow-y:auto;padding:20px"></div>
+                    <div style="padding:15px;border-top:1px solid var(--border);display:flex;gap:10px">
+                        <button id="disc-btn-open" class="action-item" style="flex:1;justify-content:center">Open Here</button>
+                        <button id="disc-btn-github1s" class="action-item" style="flex:1;justify-content:center">Github1s</button>
+                        <a id="disc-link-github" href="#" target="_blank" style="flex:1;display:flex"><button class="action-item" style="width:100%;justify-content:center">GitHub</button></a>
                     </div>
                 </div>
             </div>
@@ -229,49 +167,39 @@
     <div class="settings-panel" id="settings-panel">
         <div style="margin-bottom:15px">
             <label>GitHub Token (Opt)</label>
-            <div style="display:flex; gap:10px;">
-                <input type="password" id="gh-token" class="minimal-input" placeholder="ghp_xxxxxxxxxxxx" style="margin-bottom:0">
-                <button class="action-item" style="width:auto; padding:0 10px; height:32px;" onclick="resetSetting('gh-token', '')">Reset</button>
+            <div style="display:flex;gap:10px">
+                <input type="password" id="gh-token" class="minimal-input" placeholder="ghp_xxxxxxxxxxxx">
+                <button class="action-item" style="width:auto;padding:0 10px;height:32px" onclick="resetSetting('gh-token', '')">Reset</button>
             </div>
             <div style="font-size:12px;color:#6a737d">提高 API 速率限制。警告：配置后 Token 会发送给代理。</div>
         </div>
         <div style="margin-bottom:15px">
             <label>API Proxy / API 代理 (Opt)</label>
-            <div style="display:flex; gap:10px;">
-                <input type="text" id="api-proxy" class="minimal-input" placeholder="e.g. https://api.cors.me/" style="margin-bottom:0">
-                <button class="action-item" style="width:auto; padding:0 10px; height:32px;" onclick="resetSetting('api-proxy', '')">Reset</button>
+            <div style="display:flex;gap:10px">
+                <input type="text" id="api-proxy" class="minimal-input" placeholder="e.g. https://api.cors.me/">
+                <button class="action-item" style="width:auto;padding:0 10px;height:32px" onclick="resetSetting('api-proxy', '')">Reset</button>
             </div>
             <div style="font-size:12px;color:#6a737d">GitHub API 请求前缀，用于绕过 CORS 或速率限制。</div>
         </div>
         <div style="margin-bottom:15px">
             <label>Release Asset URL Template / Release 下载链接模板</label>
-            <div style="display:flex; gap:10px;">
-                <input type="text" id="release-url-template" class="minimal-input" placeholder="https://github.com/{owner}/{repo}/releases/download/{tag}/{filename}" style="margin-bottom:0">
-                <button class="action-item" style="width:auto; padding:0 10px; height:32px;" onclick="resetSetting('release-url-template', 'https://github.com/{owner}/{repo}/releases/download/{tag}/{filename}')">Reset</button>
+            <div style="display:flex;gap:10px">
+                <input type="text" id="release-url-template" class="minimal-input" placeholder="https://github.com/{owner}/{repo}/releases/download/{tag}/{filename}">
+                <button class="action-item" style="width:auto;padding:0 10px;height:32px" onclick="resetSetting('release-url-template', 'https://github.com/{owner}/{repo}/releases/download/{tag}/{filename}')">Reset</button>
             </div>
-            <div style="font-size:12px;color:#6a737d; margin-top:5px;">自定义 Release 附件下载链接。占位符: {owner}, {repo}, {tag}, {filename}。</div>
-            <div class="url-preview" id="release-preview" style="font-size:12px; color:var(--link); margin-top:5px; word-break:break-all; font-family:monospace; background:rgba(255,255,255,0.05); padding:5px; border-radius:4px;"></div>
-            <div style="font-size:11px;color:#8b949e;margin-top:5px;line-height:1.4">
-                Examples:<br>
-                - Default: <code>https://github.com/{owner}/{repo}/releases/download/{tag}/{filename}</code><br>
-                - Proxy: <code>https://ghproxy.com/https://github.com/{owner}/{repo}/releases/download/{tag}/{filename}</code><br>
-                - Mirror: <code>https://mirror.ghproxy.com/https://github.com/{owner}/{repo}/releases/download/{tag}/{filename}</code>
-            </div>
+            <div style="font-size:12px;color:#6a737d;margin-top:5px">自定义 Release 附件下载链接。占位符: {owner}, {repo}, {tag}, {filename}。</div>
+            <div class="url-preview" id="release-preview" style="font-size:12px;color:var(--link);margin-top:5px;word-break:break-all;font-family:monospace;background:rgba(255,255,255,0.05);padding:5px;border-radius:4px"></div>
+            <div style="font-size:11px;color:#8b949e;margin-top:5px;line-height:1.4">Examples:<br>- Default: <code>https://github.com/{owner}/{repo}/releases/download/{tag}/{filename}</code><br>- Proxy: <code>https://ghproxy.com/https://github.com/{owner}/{repo}/releases/download/{tag}/{filename}</code><br>- Mirror: <code>https://mirror.ghproxy.com/https://github.com/{owner}/{repo}/releases/download/{tag}/{filename}</code></div>
         </div>
         <div>
             <label>File URL Template / 文件链接模板</label>
-            <div style="display:flex; gap:10px;">
-                <input type="text" id="url-template" class="minimal-input" value="https://raw.githubusercontent.com/{owner}/{repo}/{ref}/{path}" style="margin-bottom:0">
-                <button class="action-item" style="width:auto; padding:0 10px; height:32px;" onclick="resetSetting('url-template', 'https://raw.githubusercontent.com/{owner}/{repo}/{ref}/{path}')">Reset</button>
+            <div style="display:flex;gap:10px">
+                <input type="text" id="url-template" class="minimal-input" value="https://raw.githubusercontent.com/{owner}/{repo}/{ref}/{path}">
+                <button class="action-item" style="width:auto;padding:0 10px;height:32px" onclick="resetSetting('url-template', 'https://raw.githubusercontent.com/{owner}/{repo}/{ref}/{path}')">Reset</button>
             </div>
-            <div style="font-size:12px;color:#6a737d; margin-top:5px;">构建下载链接。可在此填入代理。占位符: {owner}, {repo}, {ref}, {path}。</div>
-            <div class="url-preview" id="file-preview" style="font-size:12px; color:var(--link); margin-top:5px; word-break:break-all; font-family:monospace; background:rgba(255,255,255,0.05); padding:5px; border-radius:4px;"></div>
-            <div style="font-size:11px;color:#8b949e;margin-top:5px;line-height:1.4">
-                Examples:<br>
-                - Default: <code>https://raw.githubusercontent.com/{owner}/{repo}/{ref}/{path}</code><br>
-                - jsDelivr: <code>https://cdn.jsdelivr.net/gh/{owner}/{repo}@{ref}/{path}</code><br>
-                - Proxy: <code>https://ghproxy.com/https://raw.githubusercontent.com/{owner}/{repo}/{ref}/{path}</code>
-            </div>
+            <div style="font-size:12px;color:#6a737d;margin-top:5px">构建下载链接。可在此填入代理。占位符: {owner}, {repo}, {ref}, {path}。</div>
+            <div class="url-preview" id="file-preview" style="font-size:12px;color:var(--link);margin-top:5px;word-break:break-all;font-family:monospace;background:rgba(255,255,255,0.05);padding:5px;border-radius:4px"></div>
+            <div style="font-size:11px;color:#8b949e;margin-top:5px;line-height:1.4">Examples:<br>- Default: <code>https://raw.githubusercontent.com/{owner}/{repo}/{ref}/{path}</code><br>- jsDelivr: <code>https://cdn.jsdelivr.net/gh/{owner}/{repo}@{ref}/{path}</code><br>- Proxy: <code>https://ghproxy.com/https://raw.githubusercontent.com/{owner}/{repo}/{ref}/{path}</code></div>
         </div>
     </div>
 
@@ -280,13 +208,13 @@
         <div style="text-align:center;margin-top:8px;font-size:13px;color:#8b949e" id="status-text">Ready / 就绪</div>
     </div>
     
-    <div class="breadcrumbs-container" id="breadcrumbs-container" style="display:none; margin-top: 20px;">
+    <div class="breadcrumbs-container" id="breadcrumbs-container" style="display:none;margin-top:20px">
         <div id="breadcrumbs" class="breadcrumbs"></div>
-        <select id="ref-selector" onchange="onRefChange()" style="width:auto;padding:4px 10px;margin:0;font-size:13px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:4px;"></select>
+        <select id="ref-selector" onchange="onRefChange()" style="width:auto;padding:4px 10px;font-size:13px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:4px"></select>
     </div>
     
-    <div id="search-container" style="margin-top: 10px; display:flex; gap:10px; align-items: center;">
-        <input type="text" id="file-search" class="minimal-input" placeholder="Search files... / 搜索文件... (Enter URL first)" style="margin-bottom:0;" disabled>
+    <div id="search-container" style="margin-top:10px;display:flex;gap:10px">
+        <input type="text" id="file-search" class="minimal-input" placeholder="Search files... / 搜索文件... (Enter URL first)" disabled>
         <button id="btn-search-file" class="action-item" onclick="performFileSearch()" disabled>Search</button>
     </div>
 
@@ -297,42 +225,37 @@
             <span class="console-title">Console Output</span>
             <span class="console-clear" onclick="clearLog()">Clear</span>
         </div>
-        <div id="console-log" class="console-log" style="display:block;margin-top:0"></div>
+        <div id="console-log" class="console-log"></div>
     </div>
     
-    <footer style="margin-top: 50px; text-align: center; font-size: 12px; color: var(--text-dim); padding-bottom: 20px;">
-        Made With ❤ By:HOG-StarWatch. Repo: <a href="https://github.com/HOG-StarWatch/github-repo-explorer" target="_blank" style="color: var(--text-dim); text-decoration: none;">GitHub Repo Explorer</a>.
+    <footer style="margin-top:50px;text-align:center;font-size:12px;color:var(--text-dim);padding-bottom:20px">
+        Made With ❤ By:HOG-StarWatch. Repo: <a href="https://github.com/HOG-StarWatch/github-repo-explorer" target="_blank" style="color:var(--text-dim);text-decoration:none">GitHub Repo Explorer</a>.
     </footer>
 
     <div class="modal-overlay" id="release-modal" onclick="if(event.target===this)closeReleaseModal()">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 style="font-size:18px">Releases</h3>
+                <h3 style="font-size:18px;margin:0">Releases</h3>
                 <div class="close-modal" onclick="closeReleaseModal()">×</div>
             </div>
-            <div class="modal-body" id="release-modal-body">
-                <!-- Release content will be injected here -->
-            </div>
+            <div class="modal-body" id="release-modal-body"></div>
         </div>
     </div>
 
     <!-- Code Search Modal -->
     <div id="code-search-modal" class="modal-overlay">
-        <div class="modal-content" style="max-width: 800px; height: 80vh; display:flex; flex-direction:column;">
+        <div class="modal-content" style="max-width:800px;height:80vh">
             <div class="modal-header">
                 <span style="font-weight:600">Code Search / 代码搜索</span>
                 <span class="close-modal" onclick="$('#code-search-modal').style.display='none'">×</span>
             </div>
-            <div class="modal-body" style="padding:15px; display:flex; flex-direction:column; flex:1; overflow:hidden;">
-                <div style="display:flex; gap:10px; margin-bottom:15px;">
-                    <input type="text" id="code-search-input" class="minimal-input" placeholder="Search code (e.g. function test)" style="margin-bottom:0;">
-                    <button class="action-item" onclick="performCodeSearch()" style="justify-content:center;">Search</button>
+            <div class="modal-body" style="padding:15px;display:flex;flex-direction:column;flex:1;overflow:hidden">
+                <div style="display:flex;gap:10px;margin-bottom:15px">
+                    <input type="text" id="code-search-input" class="minimal-input" placeholder="Search code (e.g. function test)">
+                    <button class="action-item" onclick="performCodeSearch()">Search</button>
                 </div>
-                <div id="code-search-results" style="flex:1; overflow-y:auto; border:1px solid var(--border); border-radius:6px; background:rgba(255,255,255,0.02); padding:10px;">
-                    <div style="text-align:center; padding:50px; color:#8b949e;">
-                        Enter a query to search code in this repository.<br>
-                        <small>Note: Requires GitHub API (rate limits apply).</small>
-                    </div>
+                <div id="code-search-results" style="flex:1;overflow-y:auto;border:1px solid var(--border);border-radius:6px;background:rgba(255,255,255,0.02);padding:10px">
+                    <div style="text-align:center;padding:50px;color:#8b949e">Enter a query to search code in this repository.<br><small>Note: Requires GitHub API (rate limits apply).</small></div>
                 </div>
             </div>
         </div>

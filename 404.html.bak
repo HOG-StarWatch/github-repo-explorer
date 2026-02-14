@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ìø×ªÖÐ...</title>
+    <title>è·³è½¬ä¸­...</title>
     <style>
         body { background: #0d1117; color: #c9d1d9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden; }
         .msg { text-align: center; font-size: 1.1rem; animation: pulse 1.5s infinite ease-in-out; }
@@ -13,47 +13,47 @@
     <script>
         (function() {
             try {
-                // ÅäÖÃ: Èç¹û²¿ÊðÔÚ×ÓÄ¿Â¼£¨Èç username.github.io/repo/£©£¬ÇëÔÚ´Ë´¦ÌîÐ´ '/repo'
-                // ¶ÔÓÚ github-repo-explorer ²Ö¿â£¬Í¨³£ÊÇ '/github-repo-explorer'
-                // Èç¹ûÁô¿Õ£¬½Å±¾»á³¢ÊÔ¸ù¾ÝÂ·¾¶×Ô¶¯ÍÆ¶Ï»ò¼Ù¶¨Îª¸ùÄ¿Â¼
+                // é…ç½®: å¦‚æžœéƒ¨ç½²åœ¨å­ç›®å½•ï¼ˆå¦‚ username.github.io/repo/ï¼‰ï¼Œè¯·åœ¨æ­¤å¤„å¡«å†™ '/repo'
+                // å¯¹äºŽ github-repo-explorer ä»“åº“ï¼Œé€šå¸¸æ˜¯ '/github-repo-explorer'
+                // å¦‚æžœç•™ç©ºï¼Œè„šæœ¬ä¼šå°è¯•æ ¹æ®è·¯å¾„è‡ªåŠ¨æŽ¨æ–­æˆ–å‡å®šä¸ºæ ¹ç›®å½•
                 const repoName = '/github-repo-explorer';
                 
                 const path = window.location.pathname;
                 const search = window.location.search;
                 const hash = window.location.hash;
                 
-                // ¼òµ¥µÄ×Ô¶¯ BasePath ¼ì²âÂß¼­£ºÈç¹ûÂ·¾¶ÒÔÒÑÖªµÄ repoName ¿ªÍ·£¬Ôò½«ÆäÊÓÎª BasePath
+                // ç®€å•çš„è‡ªåŠ¨ BasePath æ£€æµ‹é€»è¾‘ï¼šå¦‚æžœè·¯å¾„ä»¥å·²çŸ¥çš„ repoName å¼€å¤´ï¼Œåˆ™å°†å…¶è§†ä¸º BasePath
                 let basePath = '';
                 if (path.startsWith(repoName)) {
                     basePath = repoName;
                 }
                 
-                // Èç¹ûÒÑ¾­ÊÇ¸ùÂ·¾¶£¬»òÒÑ¾­ÊÇ Hash Â·ÓÉ¸ñÊ½£¬ÔòÖ±½ÓÖØ¶¨Ïòµ½Ö÷Ò³
+                // å¦‚æžœå·²ç»æ˜¯æ ¹è·¯å¾„ï¼Œæˆ–å·²ç»æ˜¯ Hash è·¯ç”±æ ¼å¼ï¼Œåˆ™ç›´æŽ¥é‡å®šå‘åˆ°ä¸»é¡µ
                 if (path === '/' || path === basePath + '/' || path.includes('/#')) {
                     window.location.replace(basePath + '/#/' + search);
                     return;
                 }
 
-                // ¹¹½¨Ä¿±êÂ·¾¶£º½«µ±Ç°Â·¾¶×ª»»Îª Hash Â·ÓÉ
-                // ÀýÈç: /github-repo-explorer/user/repo -> /github-repo-explorer/#/user/repo
+                // æž„å»ºç›®æ ‡è·¯å¾„ï¼šå°†å½“å‰è·¯å¾„è½¬æ¢ä¸º Hash è·¯ç”±
+                // ä¾‹å¦‚: /github-repo-explorer/user/repo -> /github-repo-explorer/#/user/repo
                 let targetPath = path;
                 if (basePath && path.startsWith(basePath)) {
                     targetPath = path.substring(basePath.length);
                 }
                 
-                // È·±£ targetPath ÒÔ / ¿ªÍ·
+                // ç¡®ä¿ targetPath ä»¥ / å¼€å¤´
                 if (!targetPath.startsWith('/')) targetPath = '/' + targetPath;
 
                 const target = basePath + '/#' + targetPath + search + hash;
                 
-                // Ö´ÐÐÌø×ª
+                // æ‰§è¡Œè·³è½¬
                 window.location.replace(target);
                 
             } catch (e) {
                 const errEl = document.querySelector('.error');
                 if (errEl) {
                     errEl.style.display = 'block';
-                    errEl.textContent = 'Ìø×ªÊ§°Ü: ' + e.message + '¡£ÕýÔÚ³¢ÊÔ·µ»ØÊ×Ò³...';
+                    errEl.textContent = 'è·³è½¬å¤±è´¥: ' + e.message + 'ã€‚æ­£åœ¨å°è¯•è¿”å›žé¦–é¡µ...';
                 }
                 console.error(e);
                 setTimeout(() => window.location.replace('/'), 3000);
@@ -62,7 +62,7 @@
     </script>
 </head>
 <body>
-    <div class="msg">ÕýÔÚÌø×ªµ½ Github Repo Explorer...</div>
+    <div class="msg">æ­£åœ¨è·³è½¬åˆ° Github Repo Explorer...</div>
     <div class="error"></div>
 </body>
 </html>
