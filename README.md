@@ -1,15 +1,45 @@
 # GitHub Repo Explorer / 仓库浏览器
 
-一个简单、优雅且功能强大的 GitHub 仓库/子目录浏览与下载工具。无需安装任何扩展或软件，直接在浏览器中运行。采用Github无鉴权API实现，墙内可用。
+**一个简单、优雅且功能强大的 GitHub 仓库/子目录浏览与下载工具。**
+无需后端，纯前端实现，支持 AI 导出、子目录下载与极速预览。
 
-* [GitHub Repo Explorer / 仓库浏览器 示例页面](https://github-repo-explorer.pages.dev/)
+[✨ 在线体验 Demo](https://github-repo-explorer.pages.dev/)
+
+---
+
+## 🌟 为什么选择它？ (Why this?)
+
+如果你遇到过以下烦恼，那么这个工具就是为你准备的：
+
+*   **只想下载某个文件夹**：GitHub 原生不支持下载子目录，Clone 整个仓库又慢又占空间。
+*   **喂给 AI 做分析**：想把项目的核心代码（如 `src/utils`）发给 ChatGPT/Claude 分析，但手动一个个文件复制太累。
+*   **网络环境不佳**：GitHub 官网访问慢，或者需要配置代理才能稳定下载 Release。
+*   **快速浏览代码**：不想打开 IDE，只想在浏览器里像操作 VS Code 一样快速折叠/展开文件夹查看代码结构。
+
+## 💡 使用场景 (Use Cases)
+
+1.  **精准资源获取**
+    *   **痛点**：很多开源项目（如字体库、图标库、配置模板）都在一个大仓库里，你只想要其中一小部分。当前已有方法譬如修改 svn，修改 git 路径等，都太麻烦了还不好用。
+    *   **解法**：找到你想要的文件夹 -> 点击 **"Download ZIP"**。
+
+2.  **🚀 极速代码阅读**
+    *   **痛点**：在 GitHub 网页上查看代码需要频繁跳转页面，无法直观看到层级结构。
+    *   **解法**：输入仓库地址 -> 获得一颗完整的目录树，采用 **Recursive Tree API** + **懒加载** 技术。
+
+3.  **⚡ 代理与加速**
+    *   **痛点**：Release 下载链接无法直接访问。
+    *   **解法**：在高级设置中配置 Release 下载镜像/代理模板（支持预览）。
+
+4.  **🤖 AI 辅助编程 (Export for AI)**
+    *   **痛点**：向 ChatGPT 提问时，往往需要提供多个文件的上下文。
+    *   **解法**：勾选你需要的文件夹或文件 -> 点击 **"Export to AI"** -> 获得一份包含所有文件路径和内容的 Markdown 格式文本 -> 直接粘贴给 AI。
 
 ## ✨ 主要特性 (Features)
 
-*   **🚀 纯前端**: 无需后端服务器，所有逻辑在浏览器中完成。
+*   **🚀 纯前端 (Serverless)**: 无需后端服务器，所有逻辑在浏览器中完成，安全且隐私。
 *   **⚡ 性能**: 
-    *   **DOM 懒加载 (Lazy Rendering)**: 即使是包含数万文件的超大仓库也能秒级渲染，毫无卡顿。
-    *   **Recursive Tree API**: 一次性获取所有文件结构，极速且节省请求次数。
+    *   **DOM 懒加载 (Lazy Rendering)**: 即使是包含数万文件的超大仓库也能秒级渲染，不因渲染卡顿。
+    *   **Recursive Tree API**: 一次性获取所有文件结构，极速且节省请求次数。支持检测 **GitHub API Truncated** 限制并发出警告。
 *   **📂 文件操作**: 
     *   **子目录下载**: 支持下载 GitHub 仓库中的任意子文件夹，自动打包为 ZIP。
 *   **🌲 交互式目录树**: 
@@ -19,6 +49,7 @@
     *   **复制链接**: 一键复制文件的 Raw 链接或 GitHub 页面链接。
     *   **拖拽框选**: 支持像操作系统一样鼠标拖拽框选多个文件。
     *   **Export to AI**: 将选中文件的内容合并导出为 AI 友好的 Prompt 格式（Markdown），方便喂给 ChatGPT/Claude。
+        *   **Token 估算**: 提供 **Token 估算** 功能，方便控制 Context Window，避免超出限制。
 *   **🔍 实时搜索与发现 (Discovery)**:
     *   **文件搜索**: 支持在已解析的仓库中实时搜索文件，自动展开目录。
     *   **仓库发现**: 
@@ -73,8 +104,9 @@
     *   **Github1s 集成**: 提供 "Open in Github1s" 按钮，一键在 VS Code 风格的 Web IDE 中查看当前浏览的代码目录。
         *   [**Github1s 项目**:](https://github.com/conwnet/github1s)是另一个项目。
     *   **分支/Tag 切换**: 自动列出所有分支和标签，方便切换。
-    *   **Token 支持**: 可配置 GitHub Token 以提高 API 速率限制。
+    *   **Token 支持**: 可配置 GitHub Token 以提高 API 速率限制，支持 **自动持久化存储** (localStorage)，无需重复输入。
     *   **代理支持**: 支持配置 API 代理以解决网络问题。
+    *   **Deep Linking**: 分享的链接会传递当前路径，方便团队协作。
 
 ## 🛠️ 使用方法 (Usage)
 
@@ -84,12 +116,24 @@
 2.  **输入链接**: 将 GitHub 仓库或文件夹的 URL 粘贴到输入框中。
     * 支持简写: `user/repo`
     * 支持粘贴完整 URL: `https://github.com/user/repo/tree/main/src`
-3.  **快捷操作**:
+3.  **浏览/选择**:
     * **Enter**: 开始解析。
+    *   展开文件夹浏览结构。
     * **拖拽**: 框选多个文件。
 4.  **导出/下载**:
     *   点击 "Download ZIP" 下载选中内容。
     *   点击 "Export to AI" 获取合并后的文本。
+    
+## ⚙️ 高级配置 (Advanced)
+
+点击 "Settings" 图标可进入高级设置：
+*   **GitHub Token**: 填入 Token 可大幅提升 API 速率限制 (60 -> 5000 次/小时)。
+*   **API Proxy**: 配置 API 代理以解决跨域或访问问题（GithubAPI本身无CORS问题）。
+*   **Download Templates**: 自定义 Release 或 Raw 文件的下载链接模板（支持302跳转的加速服务均可用）。
+    *    GitHub 的 Release 文件下载流程是：访问 github.com/.../download/... -> GitHub 服务器鉴权 -> 302 跳转 到 AWS S3 存储桶
+    *    这个 S3 链接是 动态生成且带签名 的，无法直接预测。
+
+---
 
 ## 🚀 部署指南 (Deployment)
 <span id="部署指南-deployment"></span>

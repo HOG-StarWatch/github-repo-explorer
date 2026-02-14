@@ -1,37 +1,68 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redirecting...</title>
+    <title>跳转中...</title>
     <style>
-        body { background: #0d1117; color: #c9d1d9; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .msg { text-align: center; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+        body { background: #0d1117; color: #c9d1d9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden; }
+        .msg { text-align: center; font-size: 1.1rem; animation: pulse 1.5s infinite ease-in-out; }
+        .error { color: #ff7b72; font-size: 0.9rem; margin-top: 1rem; display: none; text-align: center; max-width: 80%; }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
     </style>
     <script>
-        // 404 Hack for GitHub Pages
-        // Logic: Redirect /path/to/repo -> /#/path/to/repo
-        // This allows the SPA to load the root index.html, which then reads the hash and routes correctly.
-        
-        const path = window.location.pathname;
-        const search = window.location.search;
-        const hash = window.location.hash;
+        (function() {
+            try {
+                // 配置: 如果部署在子目录（如 username.github.io/repo/），请在此处填写 '/repo'
+                // 对于 github-repo-explorer 仓库，通常是 '/github-repo-explorer'
+                // 如果留空，脚本会尝试根据路径自动推断或假定为根目录
+                const repoName = '/github-repo-explorer';
+                
+                const path = window.location.pathname;
+                const search = window.location.search;
+                const hash = window.location.hash;
+                
+                // 简单的自动 BasePath 检测逻辑：如果路径以已知的 repoName 开头，则将其视为 BasePath
+                let basePath = '';
+                if (path.startsWith(repoName)) {
+                    basePath = repoName;
+                }
+                
+                // 如果已经是根路径，或已经是 Hash 路由格式，则直接重定向到主页
+                if (path === '/' || path === basePath + '/' || path.includes('/#')) {
+                    window.location.replace(basePath + '/#/' + search);
+                    return;
+                }
 
-        if (path && path !== '/') {
-            // Reconstruct the URL using Hash routing
-            // e.g. example.com/user/repo?q=1 -> example.com/#/user/repo?q=1
-            const target = '/#' + path + search + hash;
-            
-            // Use replace to avoid polluting history
-            window.location.replace(target);
-        } else {
-            // If we are at root but somehow 404'd, just go home
-            window.location.replace('/');
-        }
+                // 构建目标路径：将当前路径转换为 Hash 路由
+                // 例如: /github-repo-explorer/user/repo -> /github-repo-explorer/#/user/repo
+                let targetPath = path;
+                if (basePath && path.startsWith(basePath)) {
+                    targetPath = path.substring(basePath.length);
+                }
+                
+                // 确保 targetPath 以 / 开头
+                if (!targetPath.startsWith('/')) targetPath = '/' + targetPath;
+
+                const target = basePath + '/#' + targetPath + search + hash;
+                
+                // 执行跳转
+                window.location.replace(target);
+                
+            } catch (e) {
+                const errEl = document.querySelector('.error');
+                if (errEl) {
+                    errEl.style.display = 'block';
+                    errEl.textContent = '跳转失败: ' + e.message + '。正在尝试返回首页...';
+                }
+                console.error(e);
+                setTimeout(() => window.location.replace('/'), 3000);
+            }
+        })();
     </script>
 </head>
 <body>
-    <div class="msg">Redirecting to GitHub Repo Explorer...</div>
+    <div class="msg">正在跳转到 Github Repo Explorer...</div>
+    <div class="error"></div>
 </body>
 </html>
