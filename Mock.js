@@ -1,8 +1,19 @@
-// GitHub Repo Explorer 模拟数据脚本 - 增强版
-// 用法：在浏览器 F12 控制台直接粘贴运行
+// GitHub Repo Explorer 模拟数据脚本
+// 通过点击 5 次 API 状态图标加载或在浏览器 F12 控制台直接粘贴运行
 
 (function() {
     console.log('%c📦 GitHub Repo Explorer 模拟数据模式已激活', 'color: #4CAF50; font-size: 14px; font-weight: bold');
+    
+    // ==================== 辅助函数 ====================
+    function safeBtoa(str) {
+        const encoder = new TextEncoder();
+        const bytes = encoder.encode(str);
+        let binary = '';
+        for (let i = 0; i < bytes.length; i++) {
+            binary += String.fromCharCode(bytes[i]);
+        }
+        return btoa(binary);
+    }
     
     // ==================== 模拟数据 ====================
     const MOCK_DATA = {
@@ -532,7 +543,7 @@ export default Button;`
             ]
         },
         
-        // ==================== 新增：Repo Discovery 模拟数据 ====================
+        // ==================== Repo Discovery 模拟数据 ====================
         
         // 搜索仓库结果 (对应 /search/repositories)
         searchRepos: {
@@ -832,76 +843,85 @@ export default Button;`
             ]
         },
         
-        // 趋势数据 (daily/weekly/monthly)
+        // 趋势数据
         trendingRepos: {
-            daily: {
-                total_count: 25,
-                items: [
-                    {
-                        id: 2001,
-                        name: 'screenshot-to-code',
-                        full_name: 'abi/screenshot-to-code',
-                        private: false,
-                        html_url: 'https://github.com/abi/screenshot-to-code',
-                        description: 'Drop in a screenshot and convert it to clean code (HTML/Tailwind/React/Vue)',
-                        fork: false,
-                        created_at: '2023-11-15T10:00:00Z',
-                        updated_at: '2024-02-14T08:00:00Z',
-                        pushed_at: '2024-02-14T07:55:00Z',
-                        homepage: '',
-                        size: 8500,
-                        stargazers_count: 42000,
-                        watchers_count: 42000,
-                        language: 'TypeScript',
-                        forks_count: 3200,
-                        open_issues_count: 45,
-                        default_branch: 'main',
-                        score: 1.0
-                    },
-                    {
-                        id: 2002,
-                        name: 'gpt-engineer',
-                        full_name: 'gpt-engineer-org/gpt-engineer',
-                        private: false,
-                        html_url: 'https://github.com/gpt-engineer-org/gpt-engineer',
-                        description: 'Specify what you want it to build, the AI asks for clarification, and then builds it.',
-                        fork: false,
-                        created_at: '2023-06-15T14:30:00Z',
-                        updated_at: '2024-02-14T07:30:00Z',
-                        pushed_at: '2024-02-13T22:15:00Z',
-                        homepage: '',
-                        size: 12000,
-                        stargazers_count: 51000,
-                        watchers_count: 51000,
-                        language: 'Python',
-                        forks_count: 6500,
-                        open_issues_count: 120,
-                        default_branch: 'main',
-                        score: 0.98
-                    },
-                    {
-                        id: 2003,
-                        name: 'open-webui',
-                        full_name: 'open-webui/open-webui',
-                        private: false,
-                        html_url: 'https://github.com/open-webui/open-webui',
-                        description: 'User-friendly WebUI for LLMs (Formerly Ollama WebUI)',
-                        fork: false,
-                        created_at: '2023-10-09T18:40:00Z',
-                        updated_at: '2024-02-14T08:45:00Z',
-                        pushed_at: '2024-02-14T08:30:00Z',
-                        homepage: 'https://openwebui.com',
-                        size: 9500,
-                        stargazers_count: 18000,
-                        watchers_count: 18000,
-                        language: 'TypeScript',
-                        forks_count: 2100,
-                        open_issues_count: 80,
-                        default_branch: 'main',
-                        score: 0.95
-                    }
-                ]
-            }
+            total_count: 25,
+            items: [
+                {
+                    id: 2001,
+                    name: 'screenshot-to-code',
+                    full_name: 'abi/screenshot-to-code',
+                    private: false,
+                    html_url: 'https://github.com/abi/screenshot-to-code',
+                    description: 'Drop in a screenshot and convert it to clean code (HTML/Tailwind/React/Vue)',
+                    fork: false,
+                    created_at: '2023-11-15T10:00:00Z',
+                    updated_at: '2024-02-14T08:00:00Z',
+                    pushed_at: '2024-02-14T07:55:00Z',
+                    homepage: '',
+                    size: 8500,
+                    stargazers_count: 42000,
+                    watchers_count: 42000,
+                    language: 'TypeScript',
+                    forks_count: 3200,
+                    open_issues_count: 45,
+                    default_branch: 'main',
+                    score: 1.0
+                },
+                {
+                    id: 2002,
+                    name: 'gpt-engineer',
+                    full_name: 'gpt-engineer-org/gpt-engineer',
+                    private: false,
+                    html_url: 'https://github.com/gpt-engineer-org/gpt-engineer',
+                    description: 'Specify what you want it to build, the AI asks for clarification, and then builds it.',
+                    fork: false,
+                    created_at: '2023-06-15T14:30:00Z',
+                    updated_at: '2024-02-14T07:30:00Z',
+                    pushed_at: '2024-02-13T22:15:00Z',
+                    homepage: '',
+                    size: 12000,
+                    stargazers_count: 51000,
+                    watchers_count: 51000,
+                    language: 'Python',
+                    forks_count: 6500,
+                    open_issues_count: 120,
+                    default_branch: 'main',
+                    score: 0.98
+                },
+                {
+                    id: 2003,
+                    name: 'open-webui',
+                    full_name: 'open-webui/open-webui',
+                    private: false,
+                    html_url: 'https://github.com/open-webui/open-webui',
+                    description: 'User-friendly WebUI for LLMs (Formerly Ollama WebUI)',
+                    fork: false,
+                    created_at: '2023-10-09T18:40:00Z',
+                    updated_at: '2024-02-14T08:45:00Z',
+                    pushed_at: '2024-02-14T08:30:00Z',
+                    homepage: 'https://openwebui.com',
+                    size: 9500,
+                    stargazers_count: 18000,
+                    watchers_count: 18000,
+                    language: 'TypeScript',
+                    forks_count: 2100,
+                    open_issues_count: 80,
+                    default_branch: 'main',
+                    score: 0.95
+                }
+            ]
+        },
+        
+        // README 内容
+        discoveryReadmes: {
+            'facebook/react': '# React\n\nReact is a JavaScript library for building user interfaces.\n\n## Features\n\n- **Declarative**: React makes it painless to create interactive UIs.\n- **Component-Based**: Build encapsulated components that manage their own state.\n- **Learn Once, Write Anywhere**: You can develop new features in React without rewriting existing code.\n\n## Installation\n\n```bash\nnpm install react react-dom\n```\n\n## Usage\n\n```jsx\nimport React from \'react\';\nimport ReactDOM from \'react-dom\';\n\nfunction App() {\n  return <h1>Hello, world!</h1>;\n}\n\nReactDOM.render(<App />, document.getElementById(\'root\'));\n```',
+            'vuejs/vue': '# Vue.js\n\nVue.js is a progressive JavaScript framework for building user interfaces.\n\n## Getting Started\n\n```html\n<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>\n\n<div id="app">{{ message }}</div>\n\n<script>\n  const { createApp } = Vue\n  \n  createApp({\n    data() {\n      return {\n        message: \'Hello Vue!\'\n      }\n    }\n  }).mount(\'#app\')\n</script>\n```',
+            'tailwindlabs/tailwindcss': '# Tailwind CSS\n\nTailwind CSS is a utility-first CSS framework.\n\n## Installation\n\n```bash\nnpm install -D tailwindcss\nnpx tailwindcss init\n```',
+            'vitejs/vite': '# Vite\n\nVite is a build tool that aims to provide a faster and leaner development experience.\n\n## Quick Start\n\n```bash\nnpm create vite@latest my-app -- --template react\ncd my-app\nnpm install\nnpm run dev\n```',
+            'abi/screenshot-to-code': '# Screenshot to Code\n\nDrop in a screenshot and convert it to clean code.\n\n## Features\n\n- HTML/Tailwind\n- React\n- Vue\n- Responsive layouts',
+            'gpt-engineer-org/gpt-engineer': '# GPT Engineer\n\nSpecify what you want it to build, asks clarifying questions, and then builds it.\n\n## Installation\n\n```bash\npip install gpt-engineer\n```',
+            'open-webui/open-webui': '# Open WebUI\n\nUser-friendly WebUI for LLMs.\n\n## Quick Start\n\n```bash\ndocker run -d -p 3000:8080 \\\n  -v open-webui:/app/backend/data \\\n  --name open-webui \\\n  ghcr.io/open-webui/open-webui:main\n```'
         }
     };
     
@@ -945,10 +965,7 @@ export default Button;`
         // Git 树 (文件列表)
         {
             pattern: /\/repos\/([^/]+)\/([^/]+)\/git\/trees\/([^/?]+)/,
-            handler: (match) => {
-                // 可以根据 ref 返回不同的树，这里简化处理
-                return { data: MOCK_DATA.treeData };
-            }
+            handler: () => ({ data: MOCK_DATA.treeData })
         },
         
         // 提交记录
@@ -999,25 +1016,16 @@ export default Button;`
             handler: () => ({ data: MOCK_DATA.codeSearch })
         },
         
-        // ==================== 新增：Repo Discovery 路由 ====================
-        
-        // 仓库搜索 (用于 Discovery)
+        // 仓库搜索 (Discovery)
         {
             pattern: /\/search\/repositories/,
             handler: (match, url) => {
-                // 解析 URL 参数，判断是否是趋势查询
                 const urlObj = new URL(url, window.location.origin);
                 const q = urlObj.searchParams.get('q') || '';
-                const sort = urlObj.searchParams.get('sort') || 'stars';
                 
-                console.log('%c[Mock] Discovery 搜索:', 'color: #9C27B0', { q, sort });
-                
-                // 如果是日期查询（趋势），返回趋势数据
                 if (q.includes('created:>')) {
-                    return { data: MOCK_DATA.trendingRepos.daily };
+                    return { data: MOCK_DATA.trendingRepos };
                 }
-                
-                // 否则返回普通搜索结果
                 return { data: MOCK_DATA.searchRepos };
             }
         },
@@ -1025,25 +1033,33 @@ export default Button;`
         // README 内容
         {
             pattern: /\/repos\/([^/]+)\/([^/]+)\/readme/,
-            handler: () => ({
-                data: {
-                    type: 'file',
-                    encoding: 'base64',
-                    size: 1234,
-                    name: 'README.md',
-                    path: 'README.md',
-                    content: btoa(MOCK_DATA.fileContents['README.md'])
-                }
-            })
+            handler: (match) => {
+                const fullName = match[1] + '/' + match[2];
+                const readmeContent = MOCK_DATA.discoveryReadmes[fullName] || '# Mock Repository\n\nNo README content available.';
+                
+                return {
+                    data: {
+                        type: 'file',
+                        encoding: 'base64',
+                        size: readmeContent.length,
+                        name: 'README.md',
+                        path: 'README.md',
+                        content: safeBtoa(readmeContent),
+                        sha: 'mock-readme-sha-123',
+                        url: `https://api.github.com/repos/${match[1]}/${match[2]}/readme`,
+                        html_url: `https://github.com/${match[1]}/${match[2]}/blob/main/README.md`,
+                        download_url: `https://raw.githubusercontent.com/${match[1]}/${match[2]}/main/README.md`
+                    }
+                };
+            }
         },
         
-        // 原始文件内容 (raw.githubusercontent.com)
+        // 原始文件内容
         {
             pattern: /raw\.githubusercontent\.com\/([^/]+)\/([^/]+)\/([^/]+)\/(.+)/,
             handler: (match) => {
                 const path = match[4];
-                // 根据路径返回对应的文件内容
-                const content = MOCK_DATA.fileContents[path] || MOCK_DATA.fileContents['README.md'];
+                const content = MOCK_DATA.fileContents[path] || '# Mock content';
                 return { 
                     data: content,
                     isText: true,
@@ -1052,12 +1068,11 @@ export default Button;`
             }
         },
         
-        // 默认匹配 (用于不匹配的 API)
+        // 默认匹配
         {
             pattern: /.*/,
             handler: (match, url) => {
                 console.log('%c[Mock] 未匹配的 URL:', 'color: #ff9800', url);
-                // 返回一个空的成功响应
                 return { data: {} };
             }
         }
@@ -1069,152 +1084,135 @@ export default Button;`
     // ==================== 拦截器 ====================
     window.fetch = function(input, init) {
         const url = typeof input === 'string' ? input : input.url;
-        
         console.log('%c[Mock] 拦截请求:', 'color: #2196F3', url);
         
-        // 查找匹配的路由
         for (const route of ROUTES) {
             const match = url.match(route.pattern);
             if (match) {
                 console.log('%c[Mock] 匹配路由:', 'color: #4CAF50', route.pattern);
-                
                 const result = route.handler(match, url);
                 
-                // 构建模拟响应
-                const responseData = result.data;
-                const responseHeaders = result.headers || {};
-                
-                // 如果是文本内容，直接返回文本
                 if (result.isText) {
-                    return Promise.resolve(new Response(responseData, {
+                    return Promise.resolve(new Response(result.data, {
                         status: 200,
-                        statusText: 'OK',
-                        headers: new Headers(responseHeaders)
+                        headers: new Headers(result.headers || {})
                     }));
                 }
                 
-                // 否则返回 JSON
-                return Promise.resolve(new Response(JSON.stringify(responseData), {
+                return Promise.resolve(new Response(JSON.stringify(result.data), {
                     status: 200,
-                    statusText: 'OK',
                     headers: new Headers({
                         'Content-Type': 'application/json',
-                        ...responseHeaders
+                        ...result.headers
                     })
                 }));
             }
         }
         
-        // 如果没有匹配的路由，继续使用原始 fetch
-        console.log('%c[Mock] 未匹配，使用原始请求:', 'color: #ff9800', url);
         return originalFetch.call(this, input, init);
     };
     
     // ==================== 添加退出按钮到 UI ====================
     function addMockButton() {
         // 检查是否已存在
-        if (document.getElementById('mock-exit-btn')) {
-            return;
-        }
+        if (document.getElementById('mock-exit-btn')) return;
         
         // 创建按钮
         const btn = document.createElement('button');
         btn.id = 'mock-exit-btn';
-        btn.innerHTML = '🔌 退出模拟模式';
+        btn.innerHTML = 'Exit Mock';
         btn.style.cssText = `
             position: fixed;
-            bottom: 20px;
+            bottom: 80px;
             right: 20px;
-            z-index: 99999;
-            background: linear-gradient(135deg, #f44336, #d32f2f);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            padding: 12px 24px;
-            font-size: 16px;
-            font-weight: bold;
+            z-index: 9998;
+            background: var(--btn-bg, #238636);
+            color: var(--btn-tx, #fff);
+            border: 1px solid var(--border, #30363d);
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 500;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);
-            transition: all 0.3s ease;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            letter-spacing: 0.5px;
+            opacity: 0.8;
+            transition: opacity 0.2s, transform 0.2s;
+            font-family: inherit;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         `;
         
         // 添加悬停效果
         btn.onmouseover = () => {
-            btn.style.transform = 'scale(1.05)';
-            btn.style.boxShadow = '0 6px 20px rgba(244, 67, 54, 0.4)';
+            btn.style.opacity = '1';
+            btn.style.transform = 'translateY(-1px)';
         };
         btn.onmouseout = () => {
-            btn.style.transform = 'scale(1)';
-            btn.style.boxShadow = '0 4px 15px rgba(244, 67, 54, 0.3)';
+            btn.style.opacity = '0.8';
+            btn.style.transform = 'none';
         };
         
-        // 点击事件
         btn.onclick = function() {
             if (window.fetch === originalFetch) {
-                alert('模拟模式已退出（未激活）');
+                console.log('%c[Mock] 模拟模式已退出（未激活）', 'color: #f44336');
+                this.remove();
                 return;
             }
             window.fetch = originalFetch;
-            console.log('%c[Mock] 模拟模式已关闭，恢复原始 fetch', 'color: #f44336; font-size: 14px; font-weight: bold');
-            
-            // 更新按钮样式
-            btn.innerHTML = '✅ 已退出';
-            btn.style.background = 'linear-gradient(135deg, #4CAF50, #388E3C)';
-            btn.style.boxShadow = '0 4px 15px rgba(76, 175, 80, 0.3)';
-            
-            // 3秒后移除按钮
-            setTimeout(() => {
-                btn.style.opacity = '0';
-                setTimeout(() => {
-                    if (btn.parentNode) btn.remove();
-                }, 300);
-            }, 2000);
+            console.log('%c[Mock] 模拟模式已关闭', 'color: #f44336; font-size: 14px; font-weight: bold');
+            this.remove();
         };
         
         document.body.appendChild(btn);
-        console.log('%c[Mock] 退出按钮已添加到页面右下角', 'color: #4CAF50');
+        console.log('%c[Mock] 退出按钮已添加', 'color: #4CAF50');
     }
     
-    // 等待 DOM 加载完成后添加按钮
+    // ==================== 自动触发 Analyze 更新 ====================
+    function triggerAnalyze() {
+        const urlInput = document.getElementById('url');
+        const analyzeBtn = document.getElementById('btn-analyze');
+        
+        if (urlInput && urlInput.value.trim() && analyzeBtn && !analyzeBtn.disabled) {
+            console.log('%c[Mock] 自动触发 Analyze 更新...', 'color: #9C27B0');
+            setTimeout(() => {
+                analyzeBtn.click();
+            }, 100);
+        } else {
+            console.log('%c[Mock] 未检测到 URL 或 Analyze 按钮不可用，跳过自动更新', 'color: #FF9800');
+        }
+    }
+    
+    // 添加退出按钮和自动更新
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', addMockButton);
+        document.addEventListener('DOMContentLoaded', () => {
+            addMockButton();
+            triggerAnalyze();
+        });
     } else {
         addMockButton();
+        triggerAnalyze();
     }
     
-    // 添加一个方便的退出方法（控制台可用）
+    // 添加退出方法
     window.disableMock = function() {
         if (window.fetch === originalFetch) {
             console.log('%c[Mock] 模拟模式已关闭（未激活）', 'color: #f44336');
             return;
         }
         window.fetch = originalFetch;
-        console.log('%c[Mock] 模拟模式已关闭，恢复原始 fetch', 'color: #f44336; font-size: 14px; font-weight: bold');
+        console.log('%c[Mock] 模拟模式已关闭', 'color: #f44336; font-size: 14px; font-weight: bold');
         
-        // 移除按钮
         const btn = document.getElementById('mock-exit-btn');
-        if (btn) {
-            btn.innerHTML = '✅ 已退出';
-            btn.style.background = 'linear-gradient(135deg, #4CAF50, #388E3C)';
-            setTimeout(() => {
-                btn.style.opacity = '0';
-                setTimeout(() => btn.remove(), 300);
-            }, 2000);
-        }
+        if (btn) btn.remove();
     };
     
     // 输出使用说明
     console.log('%c📖 使用说明:', 'color: #FFC107; font-size: 14px');
     console.log('  ✅ 所有 GitHub API 请求现在返回模拟数据');
-    console.log('  ✅ Repo Discovery 已支持（搜索/趋势）');
-    console.log('  ✅ 点击右下角红色按钮可退出模拟模式');
-    console.log('  ✅ 在控制台输入 `disableMock()` 也可退出');
-    console.log('  ✅ 输入 `MOCK_DATA` 可以查看所有模拟数据');
+    console.log('  ✅ 点击右下角 "Exit Mock" 按钮可退出');
+    console.log('  ✅ 控制台输入 disableMock() 也可退出');
+    console.log('  ✅ 输入 MOCK_DATA 查看所有模拟数据');
     console.log('  ✅ 输入 `window.fetch === originalFetch` 检查是否在模拟模式');
     
-    // 暴露 MOCK_DATA 到全局，方便调试
+    // 暴露 MOCK_DATA 到全局
     window.MOCK_DATA = MOCK_DATA;
     window.originalFetch = originalFetch;
     

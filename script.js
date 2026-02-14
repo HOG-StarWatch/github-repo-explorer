@@ -2220,4 +2220,53 @@ window.addEventListener('DOMContentLoaded', () => {
         $('#url').value = targetUrl;
         setTimeout(start, 100);
     }
+    
+    // 点击 5 次 API 状态图标加载 Mock.js
+(function() {
+    let clickCount = 0;
+    let lastClickTime = 0;
+    let timer = null;
+    
+    const apiStatus = document.getElementById('api-status');
+    if (!apiStatus) return;
+    
+    apiStatus.addEventListener('click', function() {
+        const now = Date.now();
+        
+        // 超过 2 秒没点击，重置计数
+        if (now - lastClickTime > 2000) {
+            clickCount = 0;
+        }
+        
+        clickCount++;
+        lastClickTime = now;
+        
+        // 清除之前的定时器
+        if (timer) clearTimeout(timer);
+        
+        // 2 秒后重置计数
+        timer = setTimeout(() => {
+            clickCount = 0;
+        }, 2000);
+        
+        // 达到 5 次，加载 Mock.js
+        if (clickCount === 5) {
+            console.log('加载 Mock.js...');
+            
+            const script = document.createElement('script');
+            script.src = 'Mock.js?' + Date.now(); // 加时间戳防缓存
+            document.body.appendChild(script);
+            
+            // 重置计数
+            clickCount = 0;
+            if (timer) {
+                clearTimeout(timer);
+                timer = null;
+            }
+        }
+    });
+    
+    // 添加提示（可选）
+    apiStatus.title += ' (点击5次加载调试工具)';
+})();
 });
