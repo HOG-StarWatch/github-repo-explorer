@@ -530,6 +530,12 @@ const toggleAll = (checkbox, event) => {
     }
     
     if (checkbox.getAttribute('data-type') === 'folder') {
+        if (checkbox.checked) {
+            const details = checkbox.closest('details');
+            if (details && !details.__rendered) {
+                details.open = true;
+            }
+        }
         handleFolderSelect(checkbox);
     }
     
@@ -821,7 +827,7 @@ const renderTree = (files, rootPath) => {
             div.__safeNameHtml = escapeHtml(name);
         }
 
-        const checkboxHtml = `<input type="checkbox" class="tree-checkbox" checked onclick="event.stopPropagation()" onchange="toggleAll(this, event)" data-path="${isFile ? obj.__file.path : obj.__path}" data-type="${isFile ? 'file' : 'folder'}">`;
+        const checkboxHtml = `<input type="checkbox" class="tree-checkbox" ${isFile ? 'checked' : ''} onclick="event.stopPropagation()" onchange="toggleAll(this, event)" data-path="${isFile ? obj.__file.path : obj.__path}" data-type="${isFile ? 'file' : 'folder'}">`;
 
         div.innerHTML = `
             <div class="tree-content">
