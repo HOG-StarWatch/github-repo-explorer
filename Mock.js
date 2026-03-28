@@ -1210,7 +1210,7 @@ export default Button;`
     console.log('  ✅ 点击右下角 "Exit Mock" 按钮可退出');
     console.log('  ✅ 控制台输入 disableMock() 也可退出');
     console.log('  ✅ 输入 MOCK_DATA 查看所有模拟数据');
-    console.log('  ✅ 输入 `window.fetch === originalFetch` 检查是否在模拟模式');
+    console.log('  ✅ 输入 `window.fetch === originalFetch` 检查是否在模拟模式 false表示为模拟模式');
     
     // 暴露 MOCK_DATA 到全局
     window.MOCK_DATA = MOCK_DATA;

@@ -15,6 +15,7 @@ let currentPreviewRepo = null;
 let currentRawReadme = null;
 let statusDataCache = { key: '' };
 const readmeCache = new Map();
+let hasWarnedTokenProxy = false;
 
 // 文本常量
 const TEXT = {
@@ -77,7 +78,8 @@ const showToast = (message, type = 'info', duration = 3000) => {
     if (type === 'success') icon = '✅';
     if (type === 'error') icon = '❌';
     
-    toast.innerHTML = `<div class="toast-icon">${icon}</div><div>${message.replace(/\n/g, '<br>')}</div>`;
+    const safeMessage = escapeHtml(message).replace(/\n/g, '<br>');
+    toast.innerHTML = `<div class="toast-icon">${icon}</div><div>${safeMessage}</div>`;
     container.appendChild(toast);
     
     requestAnimationFrame(() => toast.classList.add('show'));
@@ -117,6 +119,59 @@ const formatSize = (bytes) => {
 
 const formatCompactNumber = (num) => {
     return Intl.NumberFormat('en-US', { notation: "compact", maximumFractionDigits: 1 }).format(num);
+};
+
+const escapeHtml = (value) => {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/\//g, '&#x2F;');
+};
+
+const escapeForSingleQuotedJs = (value) => {
+    return String(value ?? '')
+        .replace(/\\/g, '\\\\')
+        .replace(/'/g, "\\'")
+        .replace(/\r/g, '\\r')
+        .replace(/\n/g, '\\n');
+};
+
+const sanitizeHtml = (value) => {
+    if (window.DOMPurify && typeof window.DOMPurify.sanitize === 'function') {
+        return window.DOMPurify.sanitize(String(value ?? ''));
+    }
+    const template = document.createElement('template');
+    template.innerHTML = String(value ?? '');
+    template.content.querySelectorAll('script,style,iframe,object,embed,link,meta').forEach(el => el.remove());
+    template.content.querySelectorAll('*').forEach(el => {
+        Array.from(el.attributes).forEach(attr => {
+            const name = attr.name.toLowerCase();
+            const normalizedName = name.replace(/[\u0000-\u001F\u007F\s]/g, '');
+            const rawValue = attr.value.trim();
+            if (/^on/i.test(normalizedName)) {
+                el.removeAttribute(attr.name);
+                return;
+            }
+            if (['href', 'src', 'xlink:href', 'action', 'formaction'].includes(name)) {
+                const lowered = rawValue.toLowerCase().replace(/[\u0000-\u001F\u007F\s]/g, '');
+                if (lowered.startsWith('javascript:') || lowered.startsWith('vbscript:') || lowered.startsWith('data:')) {
+                    el.removeAttribute(attr.name);
+                }
+            }
+        });
+    });
+    return template.innerHTML;
+};
+
+const safeHttpUrl = (value, fallback = '#') => {
+    try {
+        const u = new URL(String(value ?? ''), window.location.href);
+        if (u.protocol === 'http:' || u.protocol === 'https:') return u.href;
+    } catch (e) {}
+    return fallback;
 };
 
 const timeAgo = (date) => {
@@ -159,7 +214,13 @@ const fetchWithProxy = async (url, type = 'api') => {
     const apiProxy = $('#api-proxy').value.trim();
     const token = $('#gh-token').value.trim();
     const headers = {};
-    if (token) headers['Authorization'] = `token ${token}`;
+    const shouldAttachToken = token && (!apiProxy || type !== 'api');
+    if (shouldAttachToken) {
+        headers['Authorization'] = `token ${token}`;
+    } else if (token && apiProxy && type === 'api' && !hasWarnedTokenProxy) {
+        hasWarnedTokenProxy = true;
+        showToast('检测到 API 代理，已跳过发送 Token 以降低泄露风险。', 'info', 5000);
+    }
 
     let finalUrl = url;
     if (type === 'api' && apiProxy) {
@@ -253,11 +314,28 @@ const downloadSingleFile = (url, filename) => {
     document.body.removeChild(a);
 };
 
+const getSelectionSnapshot = () => {
+    const checkedInputs = Array.from(document.querySelectorAll('.tree-checkbox:checked'));
+    const checkedFilePaths = new Set();
+    const checkedFolderPaths = [];
+
+    checkedInputs.forEach(input => {
+        const path = input.getAttribute('data-path');
+        const type = input.getAttribute('data-type');
+        if (!path) return;
+        if (type === 'file') checkedFilePaths.add(path);
+        if (type === 'folder') checkedFolderPaths.push(path);
+    });
+
+    return { checkedFilePaths, checkedFolderPaths };
+};
+
 const getSelectedFiles = (scopePath = null) => {
-    const checkedInputs = Array.from(document.querySelectorAll('.tree-checkbox:checked[data-type="file"]'));
-    const checkedPaths = new Set(checkedInputs.map(i => i.getAttribute('data-path')));
-    
-    let files = currentFiles.filter(f => checkedPaths.has(f.path));
+    const { checkedFilePaths, checkedFolderPaths } = getSelectionSnapshot();
+    let files = currentFiles.filter(f => {
+        if (checkedFilePaths.has(f.path)) return true;
+        return checkedFolderPaths.some(folderPath => f.path === folderPath || f.path.startsWith(folderPath + '/'));
+    });
     
     if (scopePath) {
         files = files.filter(f => f.path === scopePath || f.path.startsWith(scopePath + '/'));
@@ -314,6 +392,7 @@ const downloadFilesAsZip = async (files, zipName) => {
             
             try {
                 const response = await fetch(f.url);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 const blob = await response.blob();
                 zip.file(f.path, blob);
                 if (bar) bar.style.width = '100%';
@@ -333,10 +412,12 @@ const downloadFilesAsZip = async (files, zipName) => {
     }
 
     const content = await zip.generateAsync({ type: "blob" });
+    const objectUrl = URL.createObjectURL(content);
     const a = document.createElement("a");
-    a.href = URL.createObjectURL(content);
+    a.href = objectUrl;
     a.download = zipName;
     a.click();
+    setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
     
     log(t('done'));
     $('#progress-container').style.display = 'none';
@@ -405,7 +486,9 @@ const previewFile = async (url, filename, filepath) => {
     
     try {
         if (isImg) {
-            $('#preview-body').innerHTML = `<img src="${url}" class="preview-image">`;
+            const safeUrl = safeHttpUrl(url, '');
+            if (!safeUrl) throw new Error('Invalid image URL');
+            $('#preview-body').innerHTML = `<img src="${safeUrl}" class="preview-image">`;
         } else {
             const response = await fetch(url);
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -710,24 +793,32 @@ const renderTree = (files, rootPath) => {
         if (isFile) {
             const safeId = 'file-' + obj.__file.path.replace(/[^a-zA-Z0-9]/g, '-');
             obj.__file.domId = safeId;
+            const safeRepoUrl = escapeForSingleQuotedJs(obj.__file.repoUrl);
+            const safeRawUrl = escapeForSingleQuotedJs(obj.__file.url);
+            const safeFileName = escapeForSingleQuotedJs(name);
+            const safePath = escapeForSingleQuotedJs(obj.__file.path);
+            const safeNameHtml = escapeHtml(name);
             
             progressHtml = `<div class="file-progress-wrap"><div class="file-progress-bar" id="${safeId}"></div></div>`;
             actionsHtml = `
-                <span class="action-btn" onclick="copyToClipboard('${obj.__file.repoUrl}')" title="Copy GitHub Link">Repo</span>
-                <span class="action-btn" onclick="copyToClipboard('${obj.__file.url}')" title="Copy Raw Link">Raw</span>
-                <span class="action-btn" onclick="downloadSingleFile('${obj.__file.url}', '${name}')" title="Download File">${t('download')}</span>
+                <span class="action-btn" onclick="copyToClipboard('${safeRepoUrl}')" title="Copy GitHub Link">Repo</span>
+                <span class="action-btn" onclick="copyToClipboard('${safeRawUrl}')" title="Copy Raw Link">Raw</span>
+                <span class="action-btn" onclick="downloadSingleFile('${safeRawUrl}', '${safeFileName}')" title="Download File">${t('download')}</span>
             `;
             sizeHtml = `<span class="file-size">${formatSize(obj.__file.size)}</span>`;
             
-            const safePath = obj.__file.path.replace(/'/g, "\\'");
-            clickAction = `onclick="previewFile('${obj.__file.url}', '${name}', '${safePath}')" style="cursor:pointer; text-decoration:underline;"`;
+            clickAction = `onclick="previewFile('${safeRawUrl}', '${safeFileName}', '${safePath}')" style="cursor:pointer; text-decoration:underline;"`;
+            div.__safeNameHtml = safeNameHtml;
         } else {
             const folderPath = obj.__path;
             const repoUrl = `https://github.com/${currentRepoInfo.owner}/${currentRepoInfo.repo}/tree/${currentRepoInfo.ref}/${folderPath}`;
+            const safeRepoUrl = escapeForSingleQuotedJs(repoUrl);
+            const safeFolderPath = escapeForSingleQuotedJs(folderPath);
             actionsHtml = `
-                <span class="action-btn" onclick="copyToClipboard('${repoUrl}')" title="Copy GitHub Link">Repo</span>
-                <span class="action-btn" onclick="downloadFolderZip('${folderPath}')" title="Download Folder as ZIP">${t('zip')}</span>
+                <span class="action-btn" onclick="copyToClipboard('${safeRepoUrl}')" title="Copy GitHub Link">Repo</span>
+                <span class="action-btn" onclick="downloadFolderZip('${safeFolderPath}')" title="Download Folder as ZIP">${t('zip')}</span>
             `;
+            div.__safeNameHtml = escapeHtml(name);
         }
 
         const checkboxHtml = `<input type="checkbox" class="tree-checkbox" checked onclick="event.stopPropagation()" onchange="toggleAll(this, event)" data-path="${isFile ? obj.__file.path : obj.__path}" data-type="${isFile ? 'file' : 'folder'}">`;
@@ -737,7 +828,7 @@ const renderTree = (files, rootPath) => {
                 <div class="tree-item-left">
                     ${checkboxHtml}
                     ${iconHtml}
-                    <span class="file-name" title="${name}" ${clickAction}>${name}</span>
+                    <span class="file-name" title="${div.__safeNameHtml}" ${clickAction}>${div.__safeNameHtml}</span>
                 </div>
                 <div style="display:flex; align-items:center;">
                     ${sizeHtml}
@@ -883,6 +974,19 @@ const performFileSearch = () => {
     details.forEach(d => d.open = true);
 };
 
+const restoreActionState = () => {
+    const hasRepo = Boolean(currentRepoInfo.owner && currentRepoInfo.repo);
+    const hasFiles = hasRepo && currentFiles.length > 0;
+    $('#btn-download').disabled = !hasFiles;
+    $('#btn-export-ai').disabled = !hasFiles;
+    $('#btn-github1s').disabled = !hasRepo;
+    $('#btn-status').disabled = !hasRepo;
+    $('#btn-release').disabled = !hasRepo;
+    $('#btn-code-search').disabled = !hasRepo;
+    $('#file-search').disabled = !hasFiles;
+    $('#btn-search-file').disabled = !hasFiles;
+};
+
 // 主要逻辑
 const start = async () => {
     let url = $('#url').value.trim();
@@ -915,6 +1019,7 @@ const start = async () => {
     const parsed = parseGitHubUrl(url);
     if (!parsed) {
         log(t('invalidUrl'));
+        restoreActionState();
         $('#btn-analyze').disabled = false;
         return;
     }
@@ -1007,15 +1112,17 @@ const handleUserRepos = async (owner) => {
             div.className = 'tree-item';
             div.style.padding = '5px 10px';
             div.style.cursor = 'pointer';
+            const safeRepoName = escapeHtml(repo.name || '');
+            const safeRepoDesc = escapeHtml(repo.description || '');
             div.innerHTML = `
                 <div style="display:flex; align-items:center;">
                     <span class="folder-icon"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 1 1 0-1.5h1.75v-2h-8v2h1.75a.75.75 0 0 1 0 1.5h-2.5a.75.75 0 0 1-.75-.75V2.5Zm2.5-.5a1 1 0 0 0-1 1v1h10v-1a1 1 0 0 0-1-1H4.5Zm0 3.5v7.5h10v-7.5H4.5Z"></path></svg></span>
-                    <span class="file-name" style="font-weight:600">${repo.name}</span>
-                    <span style="margin-left:10px; font-size:12px; color:#6a737d;">${repo.description || ''}</span>
+                    <span class="file-name" style="font-weight:600">${safeRepoName}</span>
+                    <span style="margin-left:10px; font-size:12px; color:#6a737d;">${safeRepoDesc}</span>
                 </div>
             `;
             div.onclick = () => {
-                $('#url').value = repo.html_url;
+                $('#url').value = safeHttpUrl(repo.html_url, '');
                 start();
             };
             container.appendChild(div);
@@ -1198,6 +1305,7 @@ const exportForAI = async () => {
         a.href = url;
         a.download = `${currentRepoInfo.repo}-context.md`;
         a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
         
         const totalTokens = Math.round(markdown.length / 4);
         const tokenMsg = `Export Complete!<br>Estimated Tokens: ${formatCompactNumber(totalTokens)}<br><small>(Based on 1 token ≈ 4 chars)</small>`;
@@ -1274,15 +1382,15 @@ const renderMarkdown = async (text, contextRepo) => {
             
             if (!res.ok) throw new Error(`API Error ${res.status}`);
             const html = await res.text();
-            content.innerHTML = html;
+            content.innerHTML = sanitizeHtml(html);
         } catch (e) {
             console.error('API Render Error', e);
-            content.innerHTML = `<div style="color:red">API Render Failed: ${e.message}. Falling back to JS.</div>`;
-            if (window.marked) content.innerHTML += window.marked.parse(text);
+            content.innerHTML = `<div style="color:red">API Render Failed: ${escapeHtml(e.message)}. Falling back to JS.</div>`;
+            if (window.marked) content.innerHTML += sanitizeHtml(window.marked.parse(text));
         }
     } else {
         if (window.marked) {
-            content.innerHTML = window.marked.parse(text);
+            content.innerHTML = sanitizeHtml(window.marked.parse(text));
         } else {
             content.innerText = text;
         }
@@ -1311,7 +1419,7 @@ const showMarkdownFile = async (filename, text, url, filepath) => {
     panel.style.borderLeft = 'none';
     
     $('#disc-preview-title').style.display = 'none';
-    $('#disc-link-github').href = url;
+    $('#disc-link-github').href = safeHttpUrl(url);
     
     currentPreviewRepo = currentRepoInfo.owner + '/' + currentRepoInfo.repo;
     currentRawReadme = text;
@@ -1428,7 +1536,7 @@ const performDiscoveryAction = async () => {
 
     } catch (e) {
         console.error(e);
-        listEl.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #ff4d4f;">Error: ${e.message}</div>`;
+        listEl.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #ff4d4f;">Error: ${escapeHtml(e.message)}</div>`;
     }
 };
 
@@ -1445,6 +1553,9 @@ const renderDiscoveryRepos = (repos) => {
         const card = document.createElement('div');
         card.className = 'repo-card';
         card.onclick = () => showDiscoveryPreview(repo);
+        const fullName = escapeHtml(repo.full_name || '');
+        const description = escapeHtml(repo.description || 'No description');
+        const language = escapeHtml(repo.language || 'Unknown');
         
         let langColor = '#ccc';
         if (repo.language) {
@@ -1458,12 +1569,12 @@ const renderDiscoveryRepos = (repos) => {
 
         card.innerHTML = `
             <div class="repo-header">
-                <span class="repo-name">${repo.full_name}</span>
+                <span class="repo-name">${fullName}</span>
                 <span style="font-size:11px; color:#8b949e">${new Date(repo.updated_at).toLocaleDateString()}</span>
             </div>
-            <div class="repo-desc">${repo.description || 'No description'}</div>
+            <div class="repo-desc">${description}</div>
             <div class="repo-meta">
-                <div class="meta-item" style="color:${langColor}"><span class="lang-dot" style="background:${langColor}"></span> ${repo.language || 'Unknown'}</div>
+                <div class="meta-item" style="color:${langColor}"><span class="lang-dot" style="background:${langColor}"></span> ${language}</div>
                 <div class="meta-item">⭐ ${(repo.stargazers_count/1000).toFixed(1)}k</div>
             </div>
         `;
@@ -1493,7 +1604,7 @@ const showDiscoveryPreview = async (repo) => {
     panel.style.borderLeft = '1px solid var(--border)';
     
     $('#disc-preview-title').innerText = repo.full_name;
-    $('#disc-link-github').href = repo.html_url;
+    $('#disc-link-github').href = safeHttpUrl(repo.html_url);
     
     currentPreviewRepo = repo;
     currentRawReadme = null;
@@ -1649,6 +1760,8 @@ const loadStatusOverview = async () => {
             fetchWithProxy(`https://api.github.com/repos/${owner}/${repo}`).then(r => r.json()),
             fetchWithProxy(`https://api.github.com/repos/${owner}/${repo}/community/profile`).then(r => r.ok ? r.json() : null)
         ]);
+        const safeLicense = escapeHtml(repoData.license ? (repoData.license.spdx_id || repoData.license.name) : 'None');
+        const safeLanguage = escapeHtml(repoData.language || 'N/A');
 
         const hasGitignore = currentFiles.some(f => f.path.endsWith('.gitignore'));
         const hasLicense = currentFiles.some(f => f.path.toUpperCase().includes('LICENSE'));
@@ -1668,10 +1781,10 @@ const loadStatusOverview = async () => {
                     <h4 style="margin-top:0; border-bottom:1px solid var(--border); padding-bottom:10px;">Repository Info</h4>
                     <div style="font-size:13px; line-height:2.2;">
                         <div>Size: <b>${formatSize(repoData.size * 1024)}</b></div>
-                        <div>License: <b>${repoData.license ? (repoData.license.spdx_id || repoData.license.name) : 'None'}</b></div>
+                        <div>License: <b>${safeLicense}</b></div>
                         <div>Created: <b>${new Date(repoData.created_at).toLocaleDateString()}</b></div>
                         <div>Updated: <b>${new Date(repoData.updated_at).toLocaleDateString()}</b></div>
-                        <div>Language: <b>${repoData.language || 'N/A'}</b></div>
+                        <div>Language: <b>${safeLanguage}</b></div>
                     </div>
                 </div>
                 <div>
@@ -1692,7 +1805,7 @@ const loadStatusOverview = async () => {
         statusDataCache.overview = true;
         
     } catch (e) {
-        container.innerHTML = `<div style="color:red">Error: ${e.message}</div>`;
+        container.innerHTML = `<div style="color:red">Error: ${escapeHtml(e.message)}</div>`;
     }
 };
 
@@ -1706,22 +1819,25 @@ const loadStatusCommits = async () => {
         
         let html = '';
         commits.forEach(c => {
+            const authorName = escapeHtml(c.commit.author.name);
+            const commitTitle = escapeHtml(c.commit.message.split('\n')[0]);
+            const shortSha = escapeHtml(c.sha.substring(0, 7));
             html += `
                 <div class="timeline-item">
                     <div class="timeline-icon" style="border-radius:4px;">C</div>
                     <div class="timeline-body">
                         <div class="timeline-header">
-                            <div style="font-weight:600;color:var(--text);">${c.commit.author.name}</div>
+                            <div style="font-weight:600;color:var(--text);">${authorName}</div>
                             <div>${timeAgo(new Date(c.commit.author.date))}</div>
                         </div>
-                        <div style="font-size:13px;color:var(--text);margin-bottom:5px;">${c.commit.message.split('\n')[0]}</div>
-                        <div style="font-size:11px;color:var(--text-dim);font-family:monospace;">${c.sha.substring(0,7)}</div>
+                        <div style="font-size:13px;color:var(--text);margin-bottom:5px;">${commitTitle}</div>
+                        <div style="font-size:11px;color:var(--text-dim);font-family:monospace;">${shortSha}</div>
                     </div>
                 </div>`;
         });
         container.innerHTML = html;
         statusDataCache.commits = true;
-    } catch(e) { container.innerHTML = `<div style="color:red">Error: ${e.message}</div>`; }
+    } catch(e) { container.innerHTML = `<div style="color:red">Error: ${escapeHtml(e.message)}</div>`; }
 };
 
 const loadStatusContributors = async () => {
@@ -1735,16 +1851,16 @@ const loadStatusContributors = async () => {
         let html = '<div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(150px, 1fr));gap:15px;">';
         users.forEach(u => {
             html += `
-                <a href="${u.html_url}" target="_blank" style="text-decoration:none;color:var(--text);background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;padding:15px;display:flex;flex-direction:column;align-items:center;transition:0.2s;" onmouseover="this.style.borderColor='var(--link)'" onmouseout="this.style.borderColor='var(--border)'">
-                    <img src="${u.avatar_url}" style="width:50px;height:50px;border-radius:50%;margin-bottom:10px;">
-                    <div style="font-weight:600;margin-bottom:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;">${u.login}</div>
+                <a href="${safeHttpUrl(u.html_url)}" target="_blank" rel="noopener noreferrer" style="text-decoration:none;color:var(--text);background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;padding:15px;display:flex;flex-direction:column;align-items:center;transition:0.2s;" onmouseover="this.style.borderColor='var(--link)'" onmouseout="this.style.borderColor='var(--border)'">
+                    <img src="${safeHttpUrl(u.avatar_url, '')}" style="width:50px;height:50px;border-radius:50%;margin-bottom:10px;">
+                    <div style="font-weight:600;margin-bottom:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;">${escapeHtml(u.login)}</div>
                     <div style="font-size:11px;color:var(--text-dim);">${u.contributions} commits</div>
                 </a>`;
         });
         html += '</div>';
         container.innerHTML = html;
         statusDataCache.contributors = true;
-    } catch(e) { container.innerHTML = `<div style="color:red">Error: ${e.message}</div>`; }
+    } catch(e) { container.innerHTML = `<div style="color:red">Error: ${escapeHtml(e.message)}</div>`; }
 };
 
 const loadStatusIssues = async () => {
@@ -1767,9 +1883,9 @@ const loadStatusIssues = async () => {
                 <div style="display:flex;gap:10px;padding:10px;border-bottom:1px solid var(--border);">
                     <div style="font-size:12px;padding-top:4px;font-weight:bold;color:var(--text-dim);">${icon}</div>
                     <div style="flex:1;">
-                        <a href="${i.html_url}" target="_blank" style="text-decoration:none;color:var(--text);font-weight:600;display:block;margin-bottom:4px;">${i.title}</a>
+                        <a href="${safeHttpUrl(i.html_url)}" target="_blank" rel="noopener noreferrer" style="text-decoration:none;color:var(--text);font-weight:600;display:block;margin-bottom:4px;">${escapeHtml(i.title)}</a>
                         <div style="font-size:12px;color:var(--text-dim);">
-                            #${i.number} opened by ${i.user.login} • ${timeAgo(new Date(i.created_at))}
+                            #${i.number} opened by ${escapeHtml(i.user.login)} • ${timeAgo(new Date(i.created_at))}
                         </div>
                     </div>
                     <div style="font-size:12px;color:var(--text-dim);display:flex;align-items:center;">
@@ -1779,7 +1895,7 @@ const loadStatusIssues = async () => {
         });
         container.innerHTML = html;
         statusDataCache.issues = true;
-    } catch(e) { container.innerHTML = `<div style="color:red">Error: ${e.message}</div>`; }
+    } catch(e) { container.innerHTML = `<div style="color:red">Error: ${escapeHtml(e.message)}</div>`; }
 };
 
 const loadStatusLanguages = async () => {
@@ -1801,11 +1917,11 @@ const loadStatusLanguages = async () => {
             if (percent < 0.1) continue;
             
             const color = colors[colorIdx % colors.length];
-            html += `<div style="width:${percent}%;background:${color};" title="${lang}: ${percent}%"></div>`;
+            html += `<div style="width:${percent}%;background:${color};" title="${escapeHtml(lang)}: ${percent}%"></div>`;
             legendHtml += `
                 <div style="display:flex;align-items:center;font-size:12px;">
                     <span style="width:10px;height:10px;background:${color};border-radius:50%;margin-right:6px;"></span>
-                    <span style="font-weight:600;margin-right:4px;">${lang}</span>
+                    <span style="font-weight:600;margin-right:4px;">${escapeHtml(lang)}</span>
                     <span style="color:var(--text-dim);">${percent}%</span>
                 </div>`;
             colorIdx++;
@@ -1814,7 +1930,7 @@ const loadStatusLanguages = async () => {
         
         container.innerHTML = html;
         statusDataCache.languages = true;
-    } catch(e) { container.innerHTML = `<div style="color:red">Error: ${e.message}</div>`; }
+    } catch(e) { container.innerHTML = `<div style="color:red">Error: ${escapeHtml(e.message)}</div>`; }
 };
 
 // 修复：Bug #7 - 添加缺失的事件类型
@@ -1841,18 +1957,18 @@ const loadStatusActivity = async () => {
                 switch(e.type) {
                     case 'PushEvent':
                         icon = 'C';
-                        action = `pushed to <span class="timeline-ref">${e.payload.ref.replace('refs/heads/', '')}</span>`;
-                        details = (e.payload.commits || []).map(c => `<div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">- ${c.message}</div>`).join('');
+                        action = `pushed to <span class="timeline-ref">${escapeHtml(e.payload.ref.replace('refs/heads/', ''))}</span>`;
+                        details = (e.payload.commits || []).map(c => `<div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">- ${escapeHtml(c.message)}</div>`).join('');
                         break;
                     case 'PullRequestEvent':
                         icon = 'PR';
-                        action = `${e.payload.action} PR <span class="timeline-ref">#${e.payload.number}</span>`;
-                        details = `<div style="font-weight:600">${e.payload.pull_request.title}</div>`;
+                        action = `${escapeHtml(e.payload.action)} PR <span class="timeline-ref">#${e.payload.number}</span>`;
+                        details = `<div style="font-weight:600">${escapeHtml(e.payload.pull_request.title)}</div>`;
                         break;
                     case 'IssuesEvent':
                         icon = 'Is';
-                        action = `${e.payload.action} issue <span class="timeline-ref">#${e.payload.issue.number}</span>`;
-                        details = `<div style="font-weight:600">${e.payload.issue.title}</div>`;
+                        action = `${escapeHtml(e.payload.action)} issue <span class="timeline-ref">#${e.payload.issue.number}</span>`;
+                        details = `<div style="font-weight:600">${escapeHtml(e.payload.issue.title)}</div>`;
                         break;
                     case 'WatchEvent':
                         icon = '★';
@@ -1864,26 +1980,26 @@ const loadStatusActivity = async () => {
                         break;
                     case 'CreateEvent':
                         icon = '+';
-                        action = `created ${e.payload.ref_type} <span class="timeline-ref">${e.payload.ref || ''}</span>`;
+                        action = `created ${escapeHtml(e.payload.ref_type)} <span class="timeline-ref">${escapeHtml(e.payload.ref || '')}</span>`;
                         break;
                     case 'DeleteEvent':
                         icon = '-';
-                        action = `deleted ${e.payload.ref_type} <span class="timeline-ref">${e.payload.ref || ''}</span>`;
+                        action = `deleted ${escapeHtml(e.payload.ref_type)} <span class="timeline-ref">${escapeHtml(e.payload.ref || '')}</span>`;
                         break;
                     case 'ReleaseEvent':
                         icon = 'R';
-                        action = `released <span class="timeline-ref">${e.payload.release.tag_name}</span>`;
+                        action = `released <span class="timeline-ref">${escapeHtml(e.payload.release.tag_name)}</span>`;
                         break;
                     case 'MemberEvent':
                         icon = 'M';
-                        action = `${e.payload.action} <span class="timeline-ref">${e.payload.member.login}</span> as collaborator`;
+                        action = `${escapeHtml(e.payload.action)} <span class="timeline-ref">${escapeHtml(e.payload.member.login)}</span> as collaborator`;
                         break;
                     case 'PublicEvent':
                         icon = '🌍';
                         action = 'made the repository public';
                         break;
                     default:
-                        action = e.type.replace('Event', '');
+                        action = escapeHtml(e.type.replace('Event', ''));
                 }
                 
                 html += `
@@ -1892,7 +2008,7 @@ const loadStatusActivity = async () => {
                         <div class="timeline-body">
                             <div class="timeline-header">
                                 <div>
-                                    <span class="timeline-user">${e.actor.login}</span> ${action}
+                                    <span class="timeline-user">${escapeHtml(e.actor.login)}</span> ${action}
                                 </div>
                                 <div>${timeAgo(new Date(e.created_at))}</div>
                             </div>
@@ -1907,7 +2023,7 @@ const loadStatusActivity = async () => {
         statusDataCache.activity = true;
         
     } catch (e) {
-        container.innerHTML = `<div style="color:red">Error: ${e.message}</div>`;
+        container.innerHTML = `<div style="color:red">Error: ${escapeHtml(e.message)}</div>`;
     }
 };
 
@@ -1929,12 +2045,12 @@ const loadStatusCI = async () => {
                     <div style="display:flex; align-items:center; gap:10px;">
                         <span style="color:${color}; font-size:16px;">${icon}</span>
                         <div>
-                            <div style="font-weight:600">${run.name}</div>
-                            <div style="font-size:11px; color:var(--text-dim);">${run.app ? run.app.name : 'GitHub Actions'}</div>
+                            <div style="font-weight:600">${escapeHtml(run.name)}</div>
+                            <div style="font-size:11px; color:var(--text-dim);">${escapeHtml(run.app ? run.app.name : 'GitHub Actions')}</div>
                         </div>
                     </div>
                     <div style="text-align:right;">
-                        <div style="font-size:12px; color:${color}; text-transform:capitalize;">${run.conclusion || run.status}</div>
+                        <div style="font-size:12px; color:${color}; text-transform:capitalize;">${escapeHtml(run.conclusion || run.status)}</div>
                         <div style="font-size:11px; color:var(--text-dim);">${new Date(run.completed_at || run.started_at).toLocaleDateString()}</div>
                     </div>
                 </div>`;
@@ -1946,7 +2062,7 @@ const loadStatusCI = async () => {
         container.innerHTML = html;
         statusDataCache.ci = true;
     } catch (e) {
-        container.innerHTML = `<div style="color:red">Error: ${e.message}</div>`;
+        container.innerHTML = `<div style="color:red">Error: ${escapeHtml(e.message)}</div>`;
     }
 };
 
@@ -1985,12 +2101,17 @@ const performCodeSearch = async () => {
             let html = '';
             data.items.forEach(item => {
                 const rawUrl = item.html_url.replace('github.com', 'raw.githubusercontent.com').replace('/blob/', '/');
+                const safeRawUrl = escapeForSingleQuotedJs(rawUrl);
+                const safeName = escapeForSingleQuotedJs(item.name);
+                const safePath = escapeForSingleQuotedJs(item.path);
+                const safePathHtml = escapeHtml(item.path);
+                const safeHtmlUrl = escapeHtml(item.html_url);
                 
                 html += `
                     <div style="padding:15px;border-bottom:1px solid var(--border);">
                         <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
-                            <a href="javascript:void(0)" onclick="previewFile('${rawUrl}', '${item.name}', '${item.path}')" style="font-weight:600;color:var(--link);text-decoration:none;">${item.path}</a>
-                            <a href="${item.html_url}" target="_blank" style="font-size:12px;color:var(--text-dim);">GitHub ↗</a>
+                            <a href="javascript:void(0)" onclick="previewFile('${safeRawUrl}', '${safeName}', '${safePath}')" style="font-weight:600;color:var(--link);text-decoration:none;">${safePathHtml}</a>
+                            <a href="${safeHtmlUrl}" target="_blank" rel="noopener noreferrer" style="font-size:12px;color:var(--text-dim);">GitHub ↗</a>
                         </div>
                         <div style="font-size:12px;color:var(--text-dim);font-family:monospace;background:rgba(0,0,0,0.2);padding:5px;border-radius:4px;overflow-x:auto;">
                             Match in file...
@@ -1999,10 +2120,10 @@ const performCodeSearch = async () => {
             });
             container.innerHTML = html;
         } else {
-            container.innerHTML = `<div style="text-align:center;padding:50px;">No matches found. <br><small>${data.message || ''}</small></div>`;
+            container.innerHTML = `<div style="text-align:center;padding:50px;">No matches found. <br><small>${escapeHtml(data.message || '')}</small></div>`;
         }
     } catch (e) {
-        container.innerHTML = `<div style="color:red;text-align:center;padding:50px;">Error: ${e.message}</div>`;
+        container.innerHTML = `<div style="color:red;text-align:center;padding:50px;">Error: ${escapeHtml(e.message)}</div>`;
     }
 };
 
@@ -2021,7 +2142,7 @@ const openReleaseInfo = async () => {
             let html = '';
             releases.forEach(rel => {
                 const date = new Date(rel.published_at).toLocaleDateString();
-                const body = rel.body ? marked.parse(rel.body) : '<i>No description</i>';
+                const body = rel.body ? sanitizeHtml(marked.parse(rel.body)) : '<i>No description</i>';
                 
                 let assetsHtml = '';
                 if (rel.assets && rel.assets.length > 0) {
@@ -2040,9 +2161,9 @@ const openReleaseInfo = async () => {
                             .replace(/\{filename\}/g, asset.name);
                         
                         assetsHtml += `
-                            <a href="${downloadUrl}" target="_blank" style="text-decoration:none;color:var(--text);background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-size:12px;display:flex;align-items:center;transition:0.2s;" onmouseover="this.style.borderColor='var(--link)'" onmouseout="this.style.borderColor='var(--border)'">
+                            <a href="${safeHttpUrl(downloadUrl)}" target="_blank" rel="noopener noreferrer" style="text-decoration:none;color:var(--text);background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-size:12px;display:flex;align-items:center;transition:0.2s;" onmouseover="this.style.borderColor='var(--link)'" onmouseout="this.style.borderColor='var(--border)'">
                                 <span style="margin-right:5px">Asset:</span>
-                                <span>${asset.name}</span>
+                                <span>${escapeHtml(asset.name)}</span>
                                 <span style="margin-left:8px;color:var(--text-dim)">${size}</span>
                             </a>
                         `;
@@ -2054,14 +2175,14 @@ const openReleaseInfo = async () => {
                     <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;padding:20px;margin-bottom:20px;">
                         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
                             <div>
-                                <h2 style="margin:0;font-size:20px;color:var(--link);">${rel.name || rel.tag_name}</h2>
+                                <h2 style="margin:0;font-size:20px;color:var(--link);">${escapeHtml(rel.name || rel.tag_name)}</h2>
                                 <div style="margin-top:5px;font-size:12px;color:var(--text-dim);">
-                                    <span style="background:var(--btn-bg);color:white;padding:2px 6px;border-radius:10px;margin-right:8px;">${rel.tag_name}</span>
+                                    <span style="background:var(--btn-bg);color:white;padding:2px 6px;border-radius:10px;margin-right:8px;">${escapeHtml(rel.tag_name)}</span>
                                     ${rel.prerelease ? '<span style="background:#9e6a03;color:white;padding:2px 6px;border-radius:10px;margin-right:8px;">Pre-release</span>' : ''}
                                     <span>Published on ${date}</span>
                                 </div>
                             </div>
-                            <a href="${rel.html_url}" target="_blank" style="font-size:13px;color:var(--text-dim);text-decoration:none;border:1px solid var(--border);padding:4px 10px;border-radius:6px;">View on GitHub</a>
+                            <a href="${safeHttpUrl(rel.html_url)}" target="_blank" rel="noopener noreferrer" style="font-size:13px;color:var(--text-dim);text-decoration:none;border:1px solid var(--border);padding:4px 10px;border-radius:6px;">View on GitHub</a>
                         </div>
                         <div class="markdown-body" style="font-size:13px;">${body}</div>
                         ${assetsHtml}
@@ -2074,7 +2195,7 @@ const openReleaseInfo = async () => {
         }
     } catch (e) {
         console.error(e);
-        container.innerHTML = `<div style="color:red;text-align:center;">Error loading releases: ${e.message}</div>`;
+        container.innerHTML = `<div style="color:red;text-align:center;">Error loading releases: ${escapeHtml(e.message)}</div>`;
     }
 };
 
